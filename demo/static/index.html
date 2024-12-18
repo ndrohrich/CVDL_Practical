@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>EMOTION CLASSIFICATOR</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700">
+    <!-- Logo Image -->
+    <img src="static\lmu.png" alt="Emotion Classifier" style="width:10%;height:auto; position: absolute;  right: 7px; top: 2px; overflow: hidden; z-index: -1;">
+</head>
+<!-- End of Header Section -->
+
+<!-- Body Section -->
+<body>
+    <!-- Main Title -->
+    <h1 style="color: #20434f; font: 700 3.5em/1 'Open Sans', sans-serif; text-align: center;">EMOTION CLASSIFIER DEMO</h1>
+    Hi, this is a demo of live emotion classification using a webcam. We trained several models for this task, including:
+    <ul>
+        <li><strong>PURE-CNN model</strong></li>
+        <li><strong>Hybrid model</strong></li>
+        <li><strong>Vision Transformer (ViT) model</strong></li>
+        <li><strong>Swin Transformer model</strong></li>
+    </ul>
+    <pre style="font-size: 18px; text-align: center; margin:0;">
+        😊  😢  😠  😲  😍
+    </pre>
+    
+    <!-- Root Container -->
+    <div class="root">
+        <!-- Title Subsection -->
+        <div class="title">
+            <div id="discription">
+            </div>
+        </div>
+        <!-- End of Title Subsection -->
+        
+        <!-- Contents Section -->
+        <div class="contents">
+            <!-- Control Panel -->
+            <div class="control panel">
+                <!-- Model Selection -->
+                <div class="modelselection">
+                    <div style="margin: 10px;">MODEL:   </div>
+                    <select id="model">
+                        <option value="cnn">PURE-CNN</option>
+                        <option value="hy">HYBRID</option>
+                        <option value="vit">VIT</option>
+                        <option value="swin">SWIN</option>
+                    </select>
+                </div>
+                <!-- Prediction Display -->
+                <div class="prediction">
+                    <div id="predictiontext">prediction</div>
+                    <div id="prediction"></div>
+                    <hr style="border: 1px solid #4aa0bc; width: 100%;">
+                    <div class="emotion" style="font-size: 14px; margin:0; padding:0; font-weight: bold; align-self: center; margin: 10px;">{{emotion[0]}}</div>
+                    <div class="emotion" style="font-size: 14px; margin:0; padding:0; font-weight: bold; align-self: center; margin: 10px;">{{emotion[1]}}</div>
+                    <div class="emotion" style="font-size: 14px; margin:0; padding:0; font-weight: bold; align-self: center; margin: 10px;">{{emotion[2]}}</div>
+                    <div class="emotion" style="font-size: 14px; margin:0; padding:0; font-weight: bold; align-self: center; margin: 10px;">{{emotion[3]}}</div>
+                    <div class="emotion" style="font-size: 14px; margin:0; padding:0; font-weight: bold; align-self: center; margin: 10px;">{{emotion[4]}}</div>
+                    <div class="emotion" style="font-size: 14px; margin:0; padding:0; font-weight: bold; align-self: center; margin: 10px;">{{emotion[5]}}</div>
+                    <div class="emotion" style="font-size: 14px; margin:0; padding:0; font-weight: bold; align-self: center; margin: 10px;">{{emotion[6]}}</div>
+                </div>
+            </div>
+            <!-- End of Control Panel -->
+
+            <!-- Video Container -->
+            <div class="video-container">
+                <!-- Webcam Video -->
+                <div class="webcam">
+                    <video id="video" autoplay="" playsinline=""></video>
+                </div>
+                <!-- Output Area -->
+                <div class="output-area">
+                    <img id="output" src="">
+                </div>  
+            </div>
+            <!-- End of Video Container -->
+        </div>
+        <!-- End of Contents Section -->
+    </div>
+    <!-- End of Root Container -->
+
+    <!-- Hidden Canvas for Frame Processing -->
+    <canvas id="canvas" style="display:none;"></canvas>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e5ebec;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .root {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 15px;
+            background-color: white;
+            width: 90%;
+
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            align-self: flex-start;
+            left: 0;
+
+        }
+        #discription {
+            font-size: 13px;
+            font-weight: normal;
+            align-self: flex-start
+
+
+   
+        }
+
+        .contents {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            width: 100%;
+            
+        }
+
+        .control.panel {
+            display: flex;
+            flex-direction: column;
+            margin: 10px;
+            padding: 10px;
+            background-color: #efefef;
+            border-radius: 10px;
+            border: 2px solid #4aa0bc;
+            align-items: center;
+            width: 20%;
+        }
+
+        .modelselection {
+            display: flex;
+        }
+
+        #model {
+            font-size: 15px;
+            font-weight: bold;
+            align-self: center;
+            margin: 10px， 0;
+            padding: 2px;
+        }
+
+        .prediction {
+            display: flex;
+            margin: 1px;
+            flex-direction: column;
+            align-items: center;
+
+       
+    
+        }
+        #predictiontext {
+            font-size: 18px;
+            font-weight: bold;
+            align-self: center;
+            margin: 10px, 0;
+
+        }
+
+
+        .video-container {
+            display: flex;
+            flex-direction: row;
+            margin: 10px;
+            padding: 10px;
+            background-color: #efefef;
+            width: 90%;
+            border-radius: 10px;
+            border: 2px solid #4aa0bc;
+
+        }
+
+        .webcam {
+            display: flex;
+            margin: 10px;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            padding: 2px;
+            align-items: stretch   ;
+
+            border-radius: 10px;
+
+        }
+        .output-area {
+            margin: 10px;
+            width: 50%;
+            height: 100%;
+            overflow: hidden;
+            padding: 2px;
+   
+            border-radius: 10px;
+
+
+        }
+        #video {
+            width: 100%;
+            align-self: stretch;
+            object-fit: cover;
+
+        }
+        #output {
+            width: 100%;
+            align-self: stretch;
+            object-fit: cover;
+        
+        }
+
+        @media (max-aspect-ratio: 1.75/1) {
+            .video-container {
+                flex-direction: column;
+            }
+            .webcam {
+                width: 100%;
+                height: 50%;
+            }
+            .output-area {
+                width: 100%;
+                height: 50%;
+            }
+            .modelselection {
+                flex-direction: column;
+                align-items: center;
+                margin: 10px;
+            }
+        }
+
+   
+
+        </style>
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    const socket = io("http://localhost:8080", { transports: ["websocket"] }); // Force WebSocket
+
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const output = document.getElementById('output');
+
+    let canSendFrame = true; // Flag to ensure synchronization control
+
+    // Access the camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => video.srcObject = stream)
+        .catch(err => console.error("Error accessing webcam:", err));
+
+    // Send video frame to server
+    function sendFrame() {
+        if (!canSendFrame) return; // If cannot send frame, return directly
+
+        // Capture current video frame
+        canvas.width = 1920;
+        canvas.height = 1080;
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        // Convert to Base64 format
+        const frameData = canvas.toDataURL('image/jpeg');
+        canSendFrame = false; // Set flag to prevent continuous sending
+        socket.emit('send_frame', frameData); // Send current frame
+    }
+
+    // Listen for processed frame returned from server
+    socket.on('processed_frame', (data) => {
+        output.src = data; // Update display with processed image
+
+        // Client confirms receipt of frame and allows sending next frame
+        socket.emit('client_received'); // Send confirmation message to server
+        canSendFrame = true; // Reset flag to allow sending next frame
+
+        // Send next frame
+        requestAnimationFrame(sendFrame);
+    });
+
+    // Start sending first frame when video plays
+    video.addEventListener('playing', () => {
+        if (canSendFrame) {
+            sendFrame();
+        }
+    });
+</script>
+
+
+</body>
+<!-- End of Body Section -->
+</html>

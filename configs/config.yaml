@@ -1,5 +1,8 @@
 # Hydra parameters, can be passed via commandline when running main.py
 
+image_size: 64 
+patch_size: 4
+
 # Model 
 # cnn, vit or hybrid 
 model: vit 

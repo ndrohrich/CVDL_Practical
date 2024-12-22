@@ -1,8 +1,5 @@
-import torch
 import torch.nn as nn
-import numpy as np
-from Blocks import TransformerBlock
-from timm.models.vision_transformer import Block
+from Blocks import Transformer_Encoder
 
 '''
 Here, we re-implement Vision Transformer from scratch, 
@@ -17,7 +14,8 @@ class VisionTransformer(nn.Module):
                  num_heads = 3, 
                  image_size = 128,
                  num_channels = 1, 
-                 patch_size = 16): 
+                 patch_size = 16,
+                 pretrained_encoder = None): 
         
         '''
         Performs Module initialization.  
@@ -38,6 +36,8 @@ class VisionTransformer(nn.Module):
             Number of input channels. We are using grayscale, i.e. 1 channel.
         patch_size: int 
             Size of quadratic patches. 
+        pretrained_encoder: nn.Module (optional)
+            Transformer Encoder from MAE pretraining.
         '''
 
         super().__init__()
@@ -50,35 +50,20 @@ class VisionTransformer(nn.Module):
         self.patch_size = patch_size
         self.num_patches = (image_size / patch_size) ** 2
 
-        # Init positional embeddings to give the model spatial information
-        self.positional_embeddings = self.get_sinusoidal_embeddings()
-
-        # Init class token as learnable parameter 
-        self.cls_token = nn.Parameter(data=torch.randn(1, 1, embed_dim))
-
-        # Init ViT layers 
-        self.linear_projection = nn.Linear(in_features=num_channels*patch_size*patch_size,
-                                           out_features=embed_dim)
-        self.transformer_blocks = nn.Sequential(*[Block(dim=embed_dim, num_heads=num_heads) for _ in range(int(self.depth))])
+        # Init transformer encoder
+        self.encoder = Transformer_Encoder.TransformerEncoder(depth=depth, 
+                                                              embed_dim=embed_dim,
+                                                              num_heads=num_heads,
+                                                              image_size=image_size, 
+                                                              num_channels=num_channels, 
+                                                              patch_size=patch_size) if pretrained_encoder is not None else pretrained_encoder
+        
+        # Init classification head 
         self.mlp_head = nn.Sequential(nn.Linear(in_features=self.embed_dim, out_features=self.embed_dim), 
                                       nn.ReLU(), 
                                       nn.Linear(in_features=self.embed_dim, out_features=self.num_classes))
         self.softmax = nn.Softmax(dim=-1)
 
-    def get_sinusoidal_embeddings(self):
-        '''
-        Gets the sinusoidal embeddings according to the standard formula.
-        '''
-        embedding_table = np.zeros((int(self.num_patches+1), int(self.embed_dim)))
-        for i in range(int(self.num_patches+1)):
-            for j in range(int(self.embed_dim)):
-                theta = i / np.power(10000, (2*j/self.embed_dim))
-                embedding_table[i, j] = theta
-        
-        embedding_table[:, 0::2] = np.sin(embedding_table[:, 0::2])
-        embedding_table[:, 1::2] = np.cos(embedding_table[:, 0::2])
-
-        return embedding_table
 
     def forward(self, input_image):
 
@@ -91,26 +76,8 @@ class VisionTransformer(nn.Module):
             Tensor of shape [C, H, W] where C=1 is channel dimension
         '''
         
-        # Patchify Image 
-        # [B, C, H, W] -> [B, num_patches, C, patch_size, patch_size]
-        patches = torch.reshape(input=input_image,
-                                shape=(input_image.shape[0], int(self.num_patches), int(self.patch_size), int(self.patch_size)))
-
-        # Flatten Image 
-        # [num_patches, C, patch_size, patch_size] -> [num_patches, C * patch_size ** 2]
-        flattened_patches = torch.flatten(patches, start_dim=-2, end_dim=-1)
-
-        # Linear Projection to Embedding Space 
-        # [num_patches, C * patch_size ** 2] -> [num_patches, embed_dim]
-        embeddings = self.linear_projection(flattened_patches)
-
-        # Concat Embeddings with [cls_token] 
-        # [num_patches, embed_dim] -> [num_patches+1, embed_dim]
-        cls_tokens = self.cls_token.repeat([embeddings.shape[0],1,1])
-        embeddings = torch.concat([cls_tokens, embeddings], dim=1)
-
-        # Forward Embeddings through Transformer Blocks 
-        embeddings = self.transformer_blocks(embeddings)
+        # Get embeddings from transformer encoder 
+        embeddings = self.transformer_encoder(input_image)
 
         # Get [cls_token]
         cls_tokens = embeddings[:, 0, :]

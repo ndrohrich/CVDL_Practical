@@ -18,18 +18,18 @@ class Trainer():
         self.args = cfg 
 
         # Setup cuda    
-        self.device = self.args.device if torch.cuda.is_available() else 'cpu'
-    
-        # If pretrain == True, perform pretraining and pass learned weights
-        if self.args.pretrain: 
-            pretrained_model = pretrain.get_pretrained_models(self.args) # TODO
+        self.device = self.args.device if torch.cuda.is_available() else 'cpu'      
 
         # Init transforms and datasets 
         self._init_transforms() # TODO
         self._init_dataloaders() # TODO
+
+        # If pretrain == True, perform pretraining and pass learned weights
+        if self.args.pretrain: 
+            self.pretrain()
         
         # Init model, loss and optimizer
-        self.model = builder.get_model(self.args, pretrained_model) # TODO 
+        self.model = builder.get_model(self.args) # TODO 
         self.loss = nn.CrossEntropyLoss()
         self.optimizer = optim.AdamW(params=self.model.params, 
                                      lr=self.args.lr)
@@ -70,6 +70,9 @@ class Trainer():
 
         self.model_dir = model_dir
         self.log_dir = log_dir
+
+    def pretrain(self):
+        self.pretrained_model = pretrain.get_pretrained_models(self.args)
 
     def train(self): 
         # Run training loop 

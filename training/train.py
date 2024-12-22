@@ -1,4 +1,4 @@
-import tqdm 
+from tqdm import tqdm
 import logging
 import torch
 import os 
@@ -27,11 +27,14 @@ class Trainer():
         # If pretrain == True, perform pretraining and pass learned weights
         if self.args.pretrain: 
             self.pretrain()
+        else:
+            self.pretrained_model = None
         
         # Init model, loss and optimizer
-        self.model = builder.get_model(self.args) # TODO 
+        self.model = builder.get_model(self.args, self.pretrained_model) # TODO 
+        self.num_parameters = sum(p.numel() for p in self.model.parameters())
         self.loss = nn.CrossEntropyLoss()
-        self.optimizer = optim.AdamW(params=self.model.params, 
+        self.optimizer = optim.AdamW(params=self.model.parameters(), 
                                      lr=self.args.lr)
         self._to_device()
         
@@ -46,9 +49,9 @@ class Trainer():
         self.test_transforms = transforms['test']
 
     def _init_dataloaders(self): 
-        datasets = merger.merge_all_datasets(self.args, self.transforms)
-        dataset_train = datasets['train']
-        dataset_test = datasets['test']
+        dataset = merger.merge_all_datasets(self.args, self.train_transforms, self.test_transforms)
+        dataset_train = dataset['train']
+        dataset_test = dataset['test']
 
         self.dataloader_train = DataLoader(dataset=dataset_train, batch_size=self.args.batch_size, shuffle=True)
         self.dataloader_test = DataLoader(dataset=dataset_test, batch_size=self.args.batch_size, shuffle=False)
@@ -61,9 +64,9 @@ class Trainer():
     def _make_model_dirs(self):
         cwd = os.getcwd()
         now = datetime.now()
-
-        log_dir = os.path.join(cwd, 'training', 'trained_models', 'self.args.model', now.strftime("%d/%m_%H:%M:%S"), 'logs')
-        model_dir = os.path.join(cwd, 'training', 'trained_models', 'self.args.model', now.strftime("%d/%m_%H:%M:%S"), 'model')
+        now = now.strftime("%d_%m__%H_%M_%S")
+        log_dir = os.path.join(cwd, 'training', 'trained_models', self.args.model, now, 'logs')
+        model_dir = os.path.join(cwd, 'training', 'trained_models', self.args.model, now, 'model')
 
         os.makedirs(log_dir)
         os.makedirs(model_dir)
@@ -77,8 +80,14 @@ class Trainer():
     def train(self): 
         # Run training loop 
         for epoch in tqdm(range(self.args.epochs)):
+            self.epoch = epoch
             logging_metrics = self.train_test_one_epoch()
             self.log_metrics(epoch, logging_metrics)
+        self._save_model()
+
+    def _save_model(self): 
+        torch.save(self.model, os.path.join(self.model_dir, 'model.pth'))
+        print(f'SAVED FINAL MODEL TO DIR: {self.model_dir}')
 
     def train_test_one_epoch(self): 
         # Init logging variables
@@ -149,6 +158,14 @@ class Trainer():
 
         return loss, outputs 
     
+    def get_accuracy(self, outputs, targets):
+        counter = 0.
+        batch_size = targets.shape[0]
+        for i in range(batch_size): 
+            if torch.argmax(outputs[i]) == torch.argmax(targets[i]):
+                counter += 1
+        return counter / self.args.batch_size
+
     def log_metrics(self, epoch, metrics): 
         total_epochs = self.args.epochs
         logging.info(f"EPOCH [{epoch}/{total_epochs}]")

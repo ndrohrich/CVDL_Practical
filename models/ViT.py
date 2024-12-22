@@ -1,5 +1,7 @@
 import torch.nn as nn
-from Blocks import Transformer_Encoder
+import os 
+print(os.getcwd())
+from models.Blocks import Transformer_Encoder
 
 '''
 Here, we re-implement Vision Transformer from scratch, 
@@ -51,12 +53,15 @@ class VisionTransformer(nn.Module):
         self.num_patches = (image_size / patch_size) ** 2
 
         # Init transformer encoder
-        self.encoder = Transformer_Encoder.TransformerEncoder(depth=depth, 
-                                                              embed_dim=embed_dim,
-                                                              num_heads=num_heads,
-                                                              image_size=image_size, 
-                                                              num_channels=num_channels, 
-                                                              patch_size=patch_size) if pretrained_encoder is not None else pretrained_encoder
+        if pretrained_encoder == None: 
+            self.encoder = Transformer_Encoder.TransformerEncoder(depth=depth, 
+                                                                embed_dim=embed_dim,
+                                                                num_heads=num_heads,
+                                                                image_size=image_size, 
+                                                                num_channels=num_channels, 
+                                                                patch_size=patch_size) 
+        else:
+            self.encoder = pretrained_encoder
         
         # Init classification head 
         self.mlp_head = nn.Sequential(nn.Linear(in_features=self.embed_dim, out_features=self.embed_dim), 
@@ -77,7 +82,7 @@ class VisionTransformer(nn.Module):
         '''
         
         # Get embeddings from transformer encoder 
-        embeddings = self.transformer_encoder(input_image)
+        embeddings = self.encoder(input_image)
 
         # Get [cls_token]
         cls_tokens = embeddings[:, 0, :]

@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import numpy as np
-from Blocks import TransformerBlock
+from models.Blocks import TransformerBlock
 from timm.models.vision_transformer import Block
 
 '''

@@ -1,8 +1,5 @@
 import hydra
-from torch.utils.tensorboard import SummaryWriter
-from training import train, Train_Classification
-from datetime import datetime
-import os
+from training import train
 
 @hydra.main(version_base=None, config_path="Configs", config_name="config")
 def main(cfg) -> None: 
@@ -10,8 +7,7 @@ def main(cfg) -> None:
    
     trainer = train.Trainer(cfg)
 
-    print("NUMBER OF PARAMETERS: ", trainer.parameters)
-    print("DEVICE TRAINED ON: ", next(trainer.model.parameters()))
+    print("NUMBER OF PARAMETERS: ", trainer.num_parameters)
     
     trainer.train()
     

@@ -11,6 +11,8 @@ from datetime import datetime
 from models.utils import builder, pretrain
 from data.utils import augmentations, merger
 
+from models.utils import discriminative_loss
+
 
 class Trainer(): 
     def __init__(self, cfg): 
@@ -33,7 +35,12 @@ class Trainer():
         # Init model, loss and optimizer
         self.model = builder.get_model(self.args, self.pretrained_model) # TODO 
         self.num_parameters = sum(p.numel() for p in self.model.parameters())
-        self.loss = nn.CrossEntropyLoss()
+        
+        # if using the model need discriminativ loss,else use cross entropy loss
+        if self.args.model == 'FCN':
+            self.loss = discriminative_loss.AffinityLoss(self.args.feature_dim, self.args.num_classes)
+        else:
+            self.loss = nn.CrossEntropyLoss()
         self.optimizer = optim.AdamW(params=self.model.parameters(), 
                                      lr=self.args.lr)
         self._to_device()

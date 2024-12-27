@@ -1,4 +1,5 @@
 from models import ViT
+from models import FCN
 
 def get_model(args, pretrained_encoder=None):
     match args.model:
@@ -11,6 +12,14 @@ def get_model(args, pretrained_encoder=None):
                                           num_channels=args.num_channels, 
                                           num_classes=args.num_classes,
                                           pretrained_encoder=pretrained_encoder)
+        case 'fcn':
+            model = FCN.ResNet(block=FCN.BasicBlock, 
+                               layers=[1, 1, 1, 1], 
+                               in_chanel=args.num_channels,
+                               feature_dim=args.fcn_feature_dim, 
+                               output_dim=args.num_classes)
         case _: 
             raise NotImplementedError()
+        
+        
     return model

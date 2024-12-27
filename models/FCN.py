@@ -86,16 +86,5 @@ class ResNet(nn.Module):
 
         return features, output
 
-def resnet(output_dim=256, feature_dim=128):
-    return ResNet(BasicBlock, [1, 1, 1, 1], feature_dim=feature_dim, output_dim=output_dim)
 
 
-# define the complete model
-class FCN(nn.Module):
-    def __init__(self, num_classes, feature_dim=256):
-        super(FCN, self).__init__()
-        self.encoder = resnet(output_dim=num_classes, feature_dim=feature_dim)
-        testinput = torch.randn(1, 1, 64, 64)
-        self._to_device()
-        _,_,[l1,l2,l3,l4] = self.encoder(testinput)
-        [self.l1_size, self.l2_size, self.l3_size, self.l4_size] = [l1.shape[:1], l2.shape[:1], l3.shape[:1], l4.shape[:1]]

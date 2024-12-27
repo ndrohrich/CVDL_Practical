@@ -45,3 +45,43 @@ class AffinityLoss(nn.Module):
         loss = torch.sum(intra_class_dist) / (inter_class_var + 1e-6)  # Add epsilon for numerical stability
 
         return loss
+
+
+class combined_loss(nn.Module):
+    def __init__(self, feature_dim, num_classes, alpha=1.0, beta=1.0):
+        """
+        Initializes the combined loss module.
+
+        Args:
+            feature_dim (int): The dimensionality of the feature vectors.
+            num_classes (int): The number of classes in the classification task.
+            alpha (float): The weight for the cross-entropy loss.
+            beta (float): The weight for the affinity loss.
+        """
+        super(combined_loss, self).__init__()
+        self.alpha = alpha
+        self.beta = beta
+        self.cross_entropy = nn.CrossEntropyLoss()
+        self.affinity_loss = AffinityLoss(feature_dim, num_classes)
+
+    def forward(self, features, labels):
+        """
+        Computes the combined loss.
+
+        Args:
+            features (torch.Tensor): Batch of feature vectors of shape (N, D), where N is the batch size and D is the feature dimension.
+            labels (torch.Tensor): Ground truth labels of shape (N,).
+
+        Returns:
+            torch.Tensor: The computed combined loss.
+        """
+        # Compute the cross-entropy loss
+        cross_entropy_loss = self.cross_entropy(features, labels)
+
+        # Compute the affinity loss
+        affinity_loss = self.affinity_loss(features, labels)
+
+        # Compute the combined loss
+        loss = self.alpha * cross_entropy_loss + self.beta * affinity_loss
+
+        return loss

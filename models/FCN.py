@@ -27,7 +27,7 @@ class BasicBlock(nn.Module):
 
         out += identity
         out = self.relu(out)
-        print(out.shape)
+        #print(out.shape)
 
         return out
 
@@ -68,11 +68,12 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
+        #print(f"input image shape:{x.shape}")
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
-        print(x.shape)
+        #print(x.shape)
 
         x = self.layer1(x)
         x = self.layer2(x)
@@ -83,6 +84,8 @@ class ResNet(nn.Module):
         x = torch.flatten(x, 1)
         features = self.feature_fc(x)
         output = self.output_fc(features)
+        
+        #print(f"features shape: {features.shape}, outputs shape: {output.shape}")
 
         return features, output
 

@@ -10,7 +10,7 @@ class VGG(nn.Module):
         self.conv_layers = nn.Sequential(
 
             # Block 1
-            nn.Conv2d(3, 64, kernel_size=3, padding=1),
+            nn.Conv2d(1, 64, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.Conv2d(64, 64, kernel_size=3, padding=1),
             nn.ReLU(),

@@ -11,7 +11,7 @@ from datetime import datetime
 from models.utils import builder, pretrain
 from data.utils import augmentations, merger
 
-from models.utils import discriminative_loss
+from models.utils import discriminativ_loss
 
 
 class Trainer(): 
@@ -37,8 +37,12 @@ class Trainer():
         self.num_parameters = sum(p.numel() for p in self.model.parameters())
         
         # if using the model need discriminativ loss,else use cross entropy loss
-        if self.args.model == 'FCN': # decide which discriminative loss to use
-            self.loss = discriminative_loss.combined_loss(self.args.combine_alpha, self.args.combine_beta)
+        if self.args.model == 'fcn': # decide which discriminative loss to use
+            print('Using discriminative loss')
+            self.loss = discriminativ_loss.combined_loss(feature_dim=self.args.fcn_feature_dim, 
+                                                          num_classes=self.args.num_classes, 
+                                                          alpha=self.args.combine_alpha, 
+                                                          beta=self.args.combine_beta)
         else:
             self.loss = nn.CrossEntropyLoss()
         self.optimizer = optim.AdamW(params=self.model.parameters(), 
@@ -140,14 +144,20 @@ class Trainer():
         return logging_metrics 
         
     def train_one_epoch(self, inputs, targets):
+        self.model.train()
         # Clear Previous gradients 
         self.model.zero_grad()
+        
+        if self.args.model=="fcn":
+            features,outputs=self.model(inputs)
+            loss=self.loss(features,outputs,targets)
+        else:
+            # Forward pass
+            outputs = self.model(inputs)
 
-        # Forward pass
-        outputs = self.model(inputs)
-
-        # Backward pass
-        loss = self.loss(outputs, targets)
+            # Backward pass
+            loss = self.loss(outputs, targets)
+            
         loss.backward()
 
         # Update weights 
@@ -156,12 +166,19 @@ class Trainer():
         return loss, outputs 
     
     def test_one_epoch(self, inputs, targets):
-       
-        # Forward pass
-        outputs = self.model(inputs)
+        
+        
+        self.model.eval()
+        
+        if self.args.model=="fcn":
+            features,outputs=self.model(inputs)
+            loss=self.loss(features,outputs,targets)
+        else:
+            # Forward pass
+            outputs = self.model(inputs)
 
-        # Compute loss
-        loss = self.loss(outputs, targets)
+            # Compute loss
+            loss = self.loss(outputs, targets)
 
         return loss, outputs 
     

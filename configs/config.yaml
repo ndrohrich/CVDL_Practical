@@ -26,3 +26,11 @@ lr: .0001
 fcn_feature_dim: 64
 combine_alpha: 0.5
 combine_beta: 0.5
+
+# augmentations specifics
+probability: 0.5
+min_area: 0.02
+max_area: 0.08
+min_aspect_ratio: 0.3
+max_aspect_ratio: 3.0
+rotation_angle: 25

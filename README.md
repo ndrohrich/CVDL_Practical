@@ -23,6 +23,24 @@ python main.py model=cnn epochs=10
 python main.py model=cnn cuda=True device=cuda:0
 ```
 
+# DATASET
+we using serveral dataset for this project, the dataset is:
+- CK+ (Cohn-Kanade Extended) dataset
+    - Input size: 48x48
+    - Number of classes: 6
+    - Number of samples: 327   
+- FER2013 dataset
+    - Input size: 48x48
+    - Number of classes: 7
+    - Number of samples: 35887
+
+# MODELS
+We have implemented several models for this project, the models are:
+- CNN
+- ViT
+- Hybrid (CNN + ViT)
+- FCN (Feature Clustering Network)
+
 # Repository Overview 
 
 - Datasets, as well as corresponding util files are saved in `data`.

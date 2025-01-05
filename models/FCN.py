@@ -85,7 +85,7 @@ class ResNet(nn.Module):
         features = self.feature_fc(x)
         output = self.output_fc(features)
         
-        #print(f"features shape: {features.shape}, outputs shape: {output.shape}")
+        # print(f"features shape: {features.shape}, outputs shape: {output.shape}")
 
         return features, output
 

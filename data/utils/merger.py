@@ -1,5 +1,6 @@
 from data.CK_plus import CK_plus
 from data.FER2013 import FER2013
+from data.AffectNet import AffectNetDataset
 import torch
 
 available_datasets = {'ckplus': CK_plus, 'fer2013': FER2013}
@@ -21,6 +22,7 @@ def merge_all_datasets(cfg, train_transforms, test_transforms):
     # # merge all datasets
     # train_dataset = torch.utils.data.ConcatDataset([datasets[dataset](train_transforms, 'train') for dataset in datasets])
     # test_dataset = torch.utils.data.ConcatDataset([datasets[dataset](test_transforms, 'test') for dataset in datasets])
+<<<<<<< HEAD
     
     # #using ckplus as dataset
     # train_dataset = CK_plus(train_transforms, 'train')
@@ -29,13 +31,68 @@ def merge_all_datasets(cfg, train_transforms, test_transforms):
     #using fer2013 as dataset
     train_dataset = FER2013(train_transforms, 'train')
     test_dataset = FER2013(test_transforms, 'test')
+=======
+
+    if cfg.dataset_mode == 'ck_plus':
+        train_dataset = CK_plus(split='train', 
+                                transform=train_transforms)
+        test_dataset = CK_plus(split='test',
+                               transform=test_transforms)
+    elif cfg.dataset_mode == 'affectnet':
+        train_dataset = AffectNetDataset(split='train', 
+                                         transform=train_transforms)
+        test_dataset = AffectNetDataset(split='test', 
+                                        transform=test_transforms)
+    elif cfg.dataset_mode == 'fer': 
+        train_dataset = FER2013(split='train',
+                                transform=train_transforms)
+        test_dataset = FER2013(split='test',
+                               transform=test_transforms)
+    else: 
+        train_dataset = []
+        test_dataset = []
+        
+        # Get CK+ dataset
+        train_dataset1 = CK_plus(split='train', 
+                                transform=train_transforms)
+        test_dataset1 = CK_plus(split='test',
+                               transform=test_transforms)
+        
+        # Get AffectNet dataset
+        train_dataset2 = AffectNetDataset(split='train', 
+                                         transform=train_transforms)
+        test_dataset2 = AffectNetDataset(split='test', 
+                                        transform=test_transforms)
+        
+        # Get FER2013 dataset
+        train_dataset3 = FER2013(split='train',
+                                transform=train_transforms)
+        test_dataset3 = FER2013(split='test',
+                               transform=test_transforms)
+
+        # Merge datasets
+        train_dataset.append(train_dataset1)
+        train_dataset.append(train_dataset2)
+        test_dataset.append(train_dataset3)
+
+        test_dataset.append(test_dataset1)
+        test_dataset.append(test_dataset2)
+        test_dataset.append(test_dataset3)
+        
+        train_dataset = torch.utils.data.ConcatDataset(train_dataset)
+        test_dataset = torch.utils.data.ConcatDataset(test_dataset)
+>>>>>>> origin/main
 
     datasets = {'train': train_dataset, 
                 'test': test_dataset}
     
-    # printing img space and label space
-    print(f"Image space: {train_dataset[0][0].shape}")
-    print(f"Label space: {train_dataset[0][1].shape}")
+    # Log input and label shape
+    print(f"IMAGE SHAPE: {train_dataset[0][0].shape}")
+    print(f"LABEL SHAPE: {train_dataset[0][1].shape}")
+
+    # Log dataset lengths
+    print(f'TRAIN DATASET LENGTH: {len(train_dataset)}')
+    print(f'TEST DATASET LENGTH: {len(test_dataset)}')
     
     return datasets
 

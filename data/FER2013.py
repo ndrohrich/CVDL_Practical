@@ -115,15 +115,15 @@ class FER2013(Dataset):
     
         
     
-from utils import augmentations
+# from utils import augmentations
 
-if __name__=='__main__':
-    transforms=augmentations.init_transforms(None)
-    dataset=FER2013(transform=transforms['train'])
+# if __name__=='__main__':
+#     transforms=augmentations.init_transforms(None)
+#     dataset=FER2013(transform=transforms['train'])
     
-    print(len(dataset))
-    img,target=dataset[np.random.randint(0,len(dataset))]
-    print(img.shape)
-    print(target)
-    plt.imshow(img[0])
-    plt.show()
+#     print(len(dataset))
+#     img,target=dataset[np.random.randint(0,len(dataset))]
+#     print(img.shape)
+#     print(target)
+#     plt.imshow(img[0])
+#     plt.show()

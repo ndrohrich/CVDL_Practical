@@ -1,7 +1,7 @@
 import hydra
 from training import train
 
-@hydra.main(version_base=None, config_path="Configs", config_name="config")
+@hydra.main(version_base=None, config_path="configs", config_name="config")
 def main(cfg) -> None: 
     
    

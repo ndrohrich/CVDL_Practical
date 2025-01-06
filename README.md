@@ -23,7 +23,7 @@ python main.py model=cnn epochs=10
 python main.py model=cnn cuda=True device=cuda:0
 ```
 
-#RUNNING THE COMPLETE PROCESS
+# RUNNING THE COMPLETE PROCESS
 
 Please follow these steps to complete the process:
 

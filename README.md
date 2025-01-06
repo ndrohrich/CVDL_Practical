@@ -57,7 +57,11 @@ python main.py mode=process_csv model=vit image_folder=./RealTimeDemoandImageCSV
 ```
 Step 3: (Realtime Face Demo)
 
-Still in Progress
+Same as Image Processing, but mode=realtime_detection
+
+```
+python main.py model=vit mode=realtime_detection
+```
 
 Step 4:(Feature maps and Highlights)
 

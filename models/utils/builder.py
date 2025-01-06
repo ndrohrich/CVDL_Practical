@@ -1,5 +1,6 @@
 from models import ViT
 from models import FCN
+from models import CNN_LeNet
 
 def get_model(args, pretrained_encoder=None):
     match args.model:
@@ -18,8 +19,10 @@ def get_model(args, pretrained_encoder=None):
                                in_chanel=args.num_channels,
                                feature_dim=args.fcn_feature_dim, 
                                output_dim=args.num_classes)
-        case _: 
-            raise NotImplementedError()
+        case 'lenet':
+            model = CNN_LeNet.LeNet5(num_classes= args.num_classes)
+        case _:
+            raise NotImplementedError
         
         
     return model

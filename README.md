@@ -23,6 +23,46 @@ python main.py model=cnn epochs=10
 python main.py model=cnn cuda=True device=cuda:0
 ```
 
+#RUNNING THE COMPLETE PROCESS
+
+Please follow these steps to complete the process:
+
+Info:
+For model 'lenet', 'vit'
+For mode 'train' 'process_csv'. By Default it is set to train.
+For dataset_mode 'ck-plus' 'affectnet' 'FER2013'
+No spaces within parameters for example model = vit doesn't work, it must be model=vit.
+
+Step 1: (Dataset and Training)
+Train the model using the following hydra command and parametrs. (example)
+
+```
+python main.py model=lenet dataset_mode=ck_plus epochs=10
+```
+
+Step2: Test Images Predictions.
+
+Please make sure that the model is trained and your validation test images are uploaded/daved in folder "RealTimeDemoandImageCSV\TestImagesFolder" for evaluation. The test image path and CSV File saving is automatically set in code. So once the below is executed you will find the emotion_prediciton.csv in your directory
+
+After this, run the following hydra command (example)
+
+```
+python main.py model=vit mode=process_csv 
+```
+
+If you want to change the validation image folder or output folder. Feel free to do so with below command format
+```
+python main.py mode=process_csv model=vit image_folder=./RealTimeDemoandImageCSV/TestImagesFolder output_csv=predictions.csv
+
+```
+Step 3: (Realtime Face Demo)
+
+Still in Progress
+
+Step 4:(Feature maps and Highlights)
+
+Still have to be figured out.
+
 # DATASET
 we using serveral dataset for this project, the dataset is:
 - CK+ (Cohn-Kanade Extended) dataset

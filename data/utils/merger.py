@@ -22,16 +22,6 @@ def merge_all_datasets(cfg, train_transforms, test_transforms):
     # # merge all datasets
     # train_dataset = torch.utils.data.ConcatDataset([datasets[dataset](train_transforms, 'train') for dataset in datasets])
     # test_dataset = torch.utils.data.ConcatDataset([datasets[dataset](test_transforms, 'test') for dataset in datasets])
-<<<<<<< HEAD
-    
-    # #using ckplus as dataset
-    # train_dataset = CK_plus(train_transforms, 'train')
-    # test_dataset = CK_plus(test_transforms, 'test')
-    
-    #using fer2013 as dataset
-    train_dataset = FER2013(train_transforms, 'train')
-    test_dataset = FER2013(test_transforms, 'test')
-=======
 
     if cfg.dataset_mode == 'ck_plus':
         train_dataset = CK_plus(split='train', 
@@ -81,7 +71,6 @@ def merge_all_datasets(cfg, train_transforms, test_transforms):
         
         train_dataset = torch.utils.data.ConcatDataset(train_dataset)
         test_dataset = torch.utils.data.ConcatDataset(test_dataset)
->>>>>>> origin/main
 
     datasets = {'train': train_dataset, 
                 'test': test_dataset}

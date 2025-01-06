@@ -1,4 +1,0 @@
-- model=fcn
-- epochs=100
-- device=cuda
-- num_classes=6

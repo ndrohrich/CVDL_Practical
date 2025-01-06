@@ -2,6 +2,7 @@ import hydra
 from training import train
 from torchvision import transforms
 from RealTimeDemoandImageCSV.ImageCSVProcessor import ImageCSVProcessor
+from RealTimeDemoandImageCSV.RealTimeEmotionDetector import RealTimeEmotionDetector
 import os
 import torch
 
@@ -19,6 +20,9 @@ def main(cfg):
         # Image processing mode
         process_images(cfg)
 
+    elif cfg.mode == "realtime_detection":
+        realtime_emotion_detection(cfg)
+        
     else:
         print(f"Unknown mode: {cfg.mode}")
 
@@ -74,6 +78,29 @@ def process_images(cfg):
     # Process the folder and save predictions to CSV
     processor.process_folder(cfg.image_folder, output_csv=cfg.output_csv)
     
+
+def realtime_emotion_detection(cfg):
+    
+    transform = transforms.Compose([
+        transforms.Resize((64, 64)),
+        transforms.ToTensor(),
+    ])
+
+    # Load the trained model dynamically based on the selected model
+    model_path = get_model_path(cfg)
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model not found at {model_path}. Train the model first!")
+    model = torch.load(model_path, map_location=cfg.device)
+    model.eval()
+
+    # Emotion labels for predictions
+    emotion_labels = ['happy', 'surprise', 'sadness', 'anger', 'disgust', 'fear']
+
+    # Initialize RealTimeEmotionDetector
+    detector = RealTimeEmotionDetector(model, transform, emotion_labels)
+
+    # Start the real-time detection
+    detector.detect_emotion()
 
 if __name__ == '__main__': 
     main()

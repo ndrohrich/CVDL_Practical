@@ -7,7 +7,7 @@ num_channels: 1
 # Model 
 model: vit          # cnn, vit or hybrid
 pretrain: False 
-dataset_mode : fer #can be either all, ck_plus or affectnet 
+dataset_mode : affectnet #can be either all, ck_plus or affectnet 
 
 # ViT specifics
 patch_size: 8

@@ -36,9 +36,11 @@ min_aspect_ratio: 0.3
 max_aspect_ratio: 3.0
 rotation_angle: 25
 #CSV Image Processing
-mode: train #can be train or process_csv, by default train
+mode: train #can be train, realtime_detection or process_csv, by default train
 image_folder: 'RealTimeDemoAndImageCSV/TestImagesFolder'
 output_csv: emotion_predictions.csv
+
+
 # FCN specifics
 fcn_feature_dim: 64
 combine_alpha: 0.5

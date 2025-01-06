@@ -1,0 +1,3 @@
+- model=fcn
+- epochs=50
+- device=cuda

@@ -1,12 +1,16 @@
 import torch 
 from torch.utils.data import Dataset, random_split
 from datasets import load_dataset
+import os,sys
 
+# set the cache directory
+root_dir=os.path.abspath(os.path.join(os.path.dirname(__file__),os.pardir))
+cache_dir=os.path.join(root_dir,'data')
 
 class CK_plus(Dataset):
     def __init__(self, transform, split):
         super().__init__()
-        dataset = load_dataset("AlirezaF138/ckplus-dataset", cache_dir='/Users/nikolairoehrich/repos/AI_Practical/CVDL_Practical/data')['train']
+        dataset = load_dataset("AlirezaF138/ckplus-dataset", cache_dir=cache_dir)['train']
         dataset_train, dataset_test = random_split(dataset, lengths=(0.8, 0.2), generator=torch.Generator().manual_seed(42))
         self.dataset = dataset_train if split == 'train' else dataset_test
         self.transforms = transform

@@ -49,6 +49,7 @@ class ResNet(nn.Module):
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         self.feature_fc = nn.Linear(512 * block.expansion, feature_dim)
+        self.feature0_fc = nn.Linear(16*16, feature_dim)
         self.output_fc = nn.Linear(feature_dim, output_dim)
 
     def _make_layer(self, block, out_channels, blocks, stride=1):
@@ -70,10 +71,15 @@ class ResNet(nn.Module):
     def forward(self, x):
         #print(f"input image shape:{x.shape}")
         x = self.conv1(x)
+        
         x = self.bn1(x)
         x = self.relu(x)
+        ending=x
         x = self.maxpool(x)
-        #print(x.shape)
+        
+        features0 = self.feature0_fc(x.mean(dim=(1)).view(x.shape[0], -1))
+    
+
 
         x = self.layer1(x)
         x = self.layer2(x)
@@ -81,6 +87,7 @@ class ResNet(nn.Module):
         x = self.layer4(x)
 
         x = self.avgpool(x)
+        
         x = torch.flatten(x, 1)
         features = self.feature_fc(x)
         output = self.output_fc(features)

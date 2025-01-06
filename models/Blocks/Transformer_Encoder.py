@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 from models.Blocks import TransformerBlock
-from timm.models.vision_transformer import Block
+#|from timm.models.vision_transformer import Block
 
 '''
 Here, we re-implement Vision Transformer Encoder from scratch, 

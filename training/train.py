@@ -56,6 +56,7 @@ class Trainer():
         
     def _init_transforms(self): 
         transforms = augmentations.init_transforms(self.args)
+        transforms = augmentations.randomErasing_transforms(self.args)
         self.train_transforms = transforms['train']
         self.test_transforms = transforms['test']
 
@@ -128,6 +129,9 @@ class Trainer():
 
                 running_loss_test += loss
                 running_accuracy_test += accuracy
+        
+        # free cuda memory
+        torch.cuda.empty_cache() if torch.cuda.is_available() else None
 
         # Log metrics to tensorboard 
         self.writer.add_scalar("Epoch Training Loss", running_loss_train/len(self.dataloader_train), self.epoch)
@@ -166,20 +170,17 @@ class Trainer():
         return loss, outputs 
     
     def test_one_epoch(self, inputs, targets):
-        
-        
         self.model.eval()
-        
-        if self.args.model=="fcn":
-            features,outputs=self.model(inputs)
-            loss=self.loss(features,outputs,targets)
-        else:
-            # Forward pass
-            outputs = self.model(inputs)
+        with torch.no_grad(): # No need to compute gradients for validation
+            if self.args.model=="fcn":
+                features,outputs=self.model(inputs)
+                loss=self.loss(features,outputs,targets)
+            else:
+                # Forward pass
+                outputs = self.model(inputs)
 
-            # Compute loss
-            loss = self.loss(outputs, targets)
-
+                # Compute loss
+                loss = self.loss(outputs, targets)
         return loss, outputs 
     
     def get_accuracy(self, outputs, targets):

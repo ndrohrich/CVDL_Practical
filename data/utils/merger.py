@@ -1,5 +1,6 @@
 from data.CK_plus import CK_plus
 from data.FER2013 import FER2013
+from data.AffectNet import AffectNetDataset
 import torch
 
 available_datasets = {'ckplus': CK_plus, 'fer2013': FER2013}
@@ -33,9 +34,13 @@ def merge_all_datasets(cfg, train_transforms, test_transforms):
     datasets = {'train': train_dataset, 
                 'test': test_dataset}
     
-    # printing img space and label space
-    print(f"Image space: {train_dataset[0][0].shape}")
-    print(f"Label space: {train_dataset[0][1].shape}")
+    # Log input and label shape
+    print(f"IMAGE SHAPE: {train_dataset[0][0].shape}")
+    print(f"LABEL SHAPE: {train_dataset[0][1].shape}")
+
+    # Log dataset lengths
+    print(f'TRAIN DATASET LENGTH: {len(train_dataset)}')
+    print(f'TEST DATASET LENGTH: {len(test_dataset)}')
     
     return datasets
 

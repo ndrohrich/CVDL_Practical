@@ -1,0 +1,3 @@
+- model=lenet
+- dataset_mode=FER2013
+- epochs=10

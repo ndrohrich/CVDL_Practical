@@ -9,3 +9,4 @@ pandas
 kagglehub
 datasets
 tensorboard
+scikit-learn

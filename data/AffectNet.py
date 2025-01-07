@@ -3,40 +3,25 @@ import torch
 from torch.utils.data import Dataset, random_split
 from datasets import load_dataset, DatasetDict, Dataset as HFDataset
 from tqdm import tqdm
+import kagglehub
+from PIL import Image
 
 class AffectNetDataset(Dataset):
     def __init__(self, transform, split):
-        cache_dir = 'data/cache'
-        train_cache_path = os.path.join(cache_dir, 'affectnet_train.pt')
-        test_cache_path = os.path.join(cache_dir, 'affectnet_test.pt')
-
-        
-        if os.path.exists(train_cache_path) and os.path.exists(test_cache_path):
-            # Load cached datasets
-            dataset_train = torch.load(train_cache_path)
-            dataset_test = torch.load(test_cache_path)
-        else:
-            # Load and filter dataset
-            dataset = load_dataset('chitradrishti/AffectNet', cache_dir=cache_dir)['train']
-            
-                
-            filtered_dataset = []
-            for item in tqdm(dataset, desc='filter') :
-                if item['label'] != 5:
-                    filtered_dataset.append(item)
-                    
-            
-            # Split dataset
-            train_len = int(0.8 * len(filtered_dataset))
-            test_len = len(filtered_dataset) - train_len
-            dataset_train, dataset_test = random_split(filtered_dataset, lengths=(train_len, test_len), generator=torch.Generator().manual_seed(42))
-            
-            # Save datasets to cache
-            torch.save(dataset_train, train_cache_path)
-            torch.save(dataset_test, test_cache_path)
-
-        self.dataset = dataset_train if split == 'train' else dataset_test
+        path = kagglehub.dataset_download("thienkhonghoc/affectnet")
+        path = path + '/AffectNet/' + split + '/'
+        self.class_folders = [0,1,2,3,4,6,7]
+        self.dataset = []
         self.transforms = transform
+        for cls in self.class_folders:
+            class_path = path + str(cls)
+            fs = os.listdir(class_path)
+            for f in fs:
+                self.dataset.append({
+                    'image': class_path + '/' + f,
+                    'label': int(cls)
+                })
+
 
     def __len__(self):
         return len(self.dataset)
@@ -46,7 +31,7 @@ class AffectNetDataset(Dataset):
 
     def __getitem__(self, idx):
         item = self.dataset[idx]
-        image = self._open_image(item['image'])
+        image = self._open_image(Image.open(item['image']))
         label = self._label_to_onehot(item['label'])
         return image, label
     

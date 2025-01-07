@@ -51,6 +51,9 @@ class ResNet(nn.Module):
         self.feature_fc = nn.Linear(512 * block.expansion, feature_dim)
         self.feature0_fc = nn.Linear(16*16, feature_dim)
         self.output_fc = nn.Linear(feature_dim, output_dim)
+        
+        self.initfc=nn.Linear(64*64,64*64)
+        self.dropout=nn.Dropout(0.2)
 
     def _make_layer(self, block, out_channels, blocks, stride=1):
         downsample = None
@@ -70,23 +73,33 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         #print(f"input image shape:{x.shape}")
+        
+        # x=x.view(x.size(0),64*64)
+        # x=self.initfc(x)
+        # x=x.view(x.size(0),1,64,64)
         x = self.conv1(x)
         
         x = self.bn1(x)
         x = self.relu(x)
         ending=x
         x = self.maxpool(x)
+        x = self.dropout(x)
+
         
-        features0 = self.feature0_fc(x.mean(dim=(1)).view(x.shape[0], -1))
+        features0 = x.mean(dim=1).view(x.size(0), -1)
+        # print(f"features0 shape: {features0.shape}")
     
 
 
         x = self.layer1(x)
+        # drop out
+        x = self.dropout(x)
         x = self.layer2(x)
         x = self.layer3(x)
         x = self.layer4(x)
 
         x = self.avgpool(x)
+        x = self.dropout(x)
         
         x = torch.flatten(x, 1)
         features = self.feature_fc(x)
@@ -94,7 +107,7 @@ class ResNet(nn.Module):
         
         # print(f"features shape: {features.shape}, outputs shape: {output.shape}")
 
-        return features, output
+        return features0, output
 
 
 

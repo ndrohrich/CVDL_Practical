@@ -95,6 +95,7 @@ class Trainer():
             self.epoch = epoch
             logging_metrics = self.train_test_one_epoch()
             self.log_metrics(epoch, logging_metrics)
+            self.writer.flush()
         self._save_model()
 
     def _save_model(self): 

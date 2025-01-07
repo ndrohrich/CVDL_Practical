@@ -7,7 +7,7 @@ num_channels: 1
 # Model 
 model: vit          # cnn, vit or hybrid
 pretrain: False 
-dataset_mode : fer #can be either all, ck_plus or affectnet 
+dataset_mode : ck_plus #can be either all, ck_plus or affectnet 
 
 # ViT specifics
 patch_size: 8
@@ -35,3 +35,10 @@ max_area: 0.08
 min_aspect_ratio: 0.3
 max_aspect_ratio: 3.0
 rotation_angle: 25
+
+#CSV Image Processing
+mode: train #can be train, realtime_detection or process_csv, by default train
+image_folder: 'RealTimeDemoAndImageCSV/TestImagesFolder'
+output_csv: emotion_predictions.csv
+
+

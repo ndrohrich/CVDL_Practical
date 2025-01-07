@@ -2,7 +2,8 @@ import cv2
 import torch
 from PIL import Image
 
-#TODO: still working on feature maps integration and also needs this to be integrated and instatiated with other models
+
+#TODO: still working on feature maps integration 
 
 
 
@@ -35,21 +36,39 @@ class RealTimeEmotionDetector:
                 break
 
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            face_rects = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+            face_rects = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40))
+
+            probabilities = None #reset for each frame
 
             for (x, y, w, h) in face_rects:
                 face = frame[y:y+h, x:x+w]
                 face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
-                face_pil = Image.fromarray(face)
+                face_pil = Image.fromarray(face).convert("L")
                 face_tensor = self.transform(face_pil).unsqueeze(0).to(self.device)
 
                 with torch.no_grad():
                     prediction = self.model(face_tensor)
+                    probabilities = prediction.cpu().numpy().flatten()
                     label = self.emotion_labels[prediction.argmax().item()]
 
                 cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
+               # Display probabilities in the top-left corner
+                if probabilities is not None:
+                    start_x, start_y = 10, 30  
+                    for i, (emotion, prob) in enumerate(zip(self.emotion_labels, probabilities)):
+                        text = f"{emotion}: {prob:.2f}"
+                        cv2.putText(
+                            frame,
+                            text,
+                            (start_x, start_y + i * 20), 
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5,
+                            (255, 0, 255),  #Text displayu color
+                            1
+                        )
+            
             cv2.imshow('Real-Time Emotion Detection', frame)
             if cv2.waitKey(1) & 0xFF == 27:  #Exit on pressing exc key
                 break

@@ -1,0 +1,3 @@
+- model=lenet
+- dataset_mode=CK_Plus
+- epochs=10

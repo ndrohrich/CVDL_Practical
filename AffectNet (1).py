@@ -13,12 +13,14 @@ class AffectNetDataset(Dataset):
         self.class_folders = [0,1,2,3,4,6,7]
         self.dataset = []
         self.transforms = transform
-        for cls in self.class_folders:
+        for cls in tqdm(self.class_folders):
             class_path = path + str(cls)
             fs = os.listdir(class_path)
-            for f in fs:
+            for f in tqdm(fs):
+                img = Image.open(class_path + '/' + f)
+                img = img.resize((64, 64))
                 self.dataset.append({
-                    'image': class_path + '/' + f,
+                    'image': img,
                     'label': int(cls)
                 })
 
@@ -31,7 +33,7 @@ class AffectNetDataset(Dataset):
 
     def __getitem__(self, idx):
         item = self.dataset[idx]
-        image = self._open_image(Image.open(item['image']))
+        image = self._open_image(item['image'])
         label = self._label_to_onehot(item['label'])
         return image, label
     

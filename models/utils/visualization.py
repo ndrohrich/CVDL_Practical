@@ -43,8 +43,7 @@ def visualize_gradients(model, img, label, cfg):
     # Get the gradients
     grad = img.grad
     grad = torch.abs(grad)
-    
-    print(f"grad shape: {grad.shape}")
+
 
     # process batch
     if len(grad.shape) == 3:
@@ -81,5 +80,5 @@ def visualize_gradients(model, img, label, cfg):
     for i in range(len(grad_arr)):
         mapped_grad_arr.append(process_gradients(grad_arr[i], img_arr[i], blur_size))
     mapped_grad_arr = np.concatenate(mapped_grad_arr, axis=0)
-    print(f"mapped_grad_arr shape: {mapped_grad_arr.shape}")
+
     return mapped_grad_arr

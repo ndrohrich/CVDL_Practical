@@ -57,7 +57,6 @@ def predict(img: np.ndarray):
     global predict_value
     global model
     predict_value = model(torch.tensor(img).float())
-    print(predict_value)
     predict_value=predict_value#[1]
 
     
@@ -128,15 +127,10 @@ def handle_frame(data):
             # using the cutted face to predict the emotion
             faceimg = np.array(Image.fromarray(gray_frame).crop((x, y, x + w, y + h)).resize((64, 64)))
             faceimg = faceimg.mean(axis=-1)
-            print(faceimg.shape)
             faceimg = faceimg.reshape(1, 1, 64, 64)
             
-            print(faceimg.shape)
             modeloutput = predict(faceimg)
-            print(modeloutput)
             cv2.putText(gray_frame, modeloutput, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 173, 0), 5)
-
-        print(f"Processed frame: {gray_frame.shape}")
 
         # Encode processed frame
         _, buffer = cv2.imencode('.jpg', gray_frame)

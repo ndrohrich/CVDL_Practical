@@ -13,6 +13,11 @@ from data.utils import augmentations, merger
 
 from models.utils import discriminativ_loss
 
+from models.FCN import FeatureExtractor
+from models.utils.visualization import visualize_gradients
+
+
+
 
 class Trainer(): 
     def __init__(self, cfg): 
@@ -43,6 +48,13 @@ class Trainer():
                                                           num_classes=self.args.num_classes, 
                                                           alpha=self.args.combine_alpha, 
                                                           beta=self.args.combine_beta)
+            # also need to use the feature extractor
+            self.feature_extractor = self.use_hook(self.model)
+            
+            
+            
+        
+            
         else:
             self.loss = nn.CrossEntropyLoss()
         self.optimizer = optim.AdamW(params=self.model.parameters(), 
@@ -111,6 +123,7 @@ class Trainer():
 
         # Train one epoch
         with tqdm(self.dataloader_train) as iterator: 
+            step = 0
             for images, targets in iterator: 
                 images, targets = images.to(self.args.device), targets.to(self.args.device)
 
@@ -119,6 +132,15 @@ class Trainer():
 
                 running_loss_train += loss
                 running_accuracy_train += accuracy
+                
+                # Log features to tensorboard as images
+                with torch.no_grad():
+                    if self.args.model == 'fcn':
+                        if step % 80 == 0:
+                            features = self.feature_extractor(self.dataloader_test.dataset[3][0].unsqueeze(0).to(self.args.device))
+                            self.writer.add_images('Features', features, self.epoch*len(self.dataloader_train)+step)
+            
+                step += 1
 
         # Test one epoch
         with tqdm(self.dataloader_test) as iterator: 
@@ -130,6 +152,12 @@ class Trainer():
 
                 running_loss_test += loss
                 running_accuracy_test += accuracy
+                
+        # log activation maps
+        features = next(iter(self.dataloader_test))[0].to(self.args.device)
+        labels = next(iter(self.dataloader_test))[1].to(self.args.device)
+        self.log_activation_maps(self.epoch, features, labels)
+        
         
         # free cuda memory
         torch.cuda.empty_cache() if torch.cuda.is_available() else None
@@ -139,6 +167,8 @@ class Trainer():
         self.writer.add_scalar("Epoch Testing Loss", running_loss_test/len(self.dataloader_test), self.epoch)
         self.writer.add_scalar("Epoch Training Accuracy", running_accuracy_train/len(self.dataloader_train), self.epoch)
         self.writer.add_scalar("Epoch Testing Accuracy", running_accuracy_test/len(self.dataloader_test), self.epoch)
+        
+    
 
         # Log metrics for terminal output
         logging_metrics = {'train_loss': running_loss_train/len(self.dataloader_train),
@@ -184,6 +214,10 @@ class Trainer():
                 loss = self.loss(outputs, targets)
         return loss, outputs 
     
+    def use_hook(self, model):
+        feature_extractor = FeatureExtractor(model)
+        return feature_extractor
+    
     def get_accuracy(self, outputs, targets):
         counter = 0.
         batch_size = targets.shape[0]
@@ -197,7 +231,7 @@ class Trainer():
         logging.info(f"EPOCH [{epoch}/{total_epochs}]")
         logging.info(f'''LOSS = [{metrics['train_loss']:.4f}/{metrics['test_loss']:.4f}], 
                      ACCURACY = [{metrics['train_acc']:.4f}/{metrics['test_acc']:.4f}]''')
-
-
-
         
+    def log_activation_maps(self, epoch, features, labels):
+        activation_map = visualize_gradients(self.model, features, labels,self.args)
+        self.writer.add_images('Activation Maps', activation_map, epoch)

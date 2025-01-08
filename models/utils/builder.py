@@ -15,7 +15,7 @@ def get_model(args, pretrained_encoder=None):
                                           pretrained_encoder=pretrained_encoder)
         case 'fcn':
             model = FCN.ResNet(block=FCN.BasicBlock, 
-                               layers=[1, 1, 1, 1], 
+                               layers=[2, 2, 2, 2], 
                                in_chanel=args.num_channels,
                                feature_dim=args.fcn_feature_dim, 
                                output_dim=args.num_classes)

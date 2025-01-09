@@ -40,6 +40,19 @@ Train the model using the following hydra command and parametrs. (example)
 python main.py model=lenet dataset_mode=ck_plus epochs=10
 ```
 
+For Torch Resnet:
+
+```
+python main.py model=torch_resnet dataset_mode=ck_plus epochs=10
+```
+
+For changing the type of torch resnet for example resnet50. Refer to configs for more info and models.
+```
+python main.py model=torch_resnet torch_resnet.model_type=resent50 epochs 10
+```
+
+
+
 Step2: Test Images Predictions.
 
 Please make sure that the model is trained and your validation test images are uploaded/daved in folder "RealTimeDemoandImageCSV\TestImagesFolder" for evaluation. The test image path and CSV File saving is automatically set in code. So once the below is executed you will find the emotion_prediciton.csv in your directory

@@ -3,6 +3,7 @@ from models import FCN
 from models import CNN_LeNet
 from models import CNN_VGG
 from models import CNN_ResNet
+from models import CNN_TorchResnet
 
 def get_model(args, pretrained_encoder=None):
     match args.model:
@@ -27,6 +28,13 @@ def get_model(args, pretrained_encoder=None):
             model = CNN_VGG.VGG(num_classes= args.num_classes, input_channels= args.num_channels)
         case 'resnet':
             model = CNN_ResNet.ResNet18(num_classes= args.num_classes)
+        case 'torch_resnet':
+            model = CNN_TorchResnet.TorchVisionResNet(
+                model_type=args.torch_resnet.model_type,
+                num_classes=args.torch_resnet.num_classes,
+                pretrained=args.torch_resnet.pretrained,
+                input_channels=args.torch_resnet.input_channels
+            )
         case _:
             raise NotImplementedError
         

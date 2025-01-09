@@ -2,6 +2,7 @@ from models import ViT
 from models import FCN
 from models import CNN_LeNet
 from models import CNN_VGG
+from models import CNN_ResNet
 
 def get_model(args, pretrained_encoder=None):
     match args.model:
@@ -24,6 +25,8 @@ def get_model(args, pretrained_encoder=None):
             model = CNN_LeNet.LeNet5(num_classes= args.num_classes)
         case 'vgg':
             model = CNN_VGG.VGG(num_classes= args.num_classes, input_channels= args.num_channels)
+        case 'resnet':
+            model = CNN_ResNet.ResNet18(num_classes= args.num_classes)
         case _:
             raise NotImplementedError
         

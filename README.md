@@ -62,6 +62,10 @@ After this, run the following hydra command (example)
 ```
 python main.py model=vit mode=process_csv 
 ```
+For Torch Resnet, Example Resnet50:
+```
+python main.py model=torch_resnet torch_resnet.model_type=resent50 mode=process_csv
+```
 
 If you want to change the validation image folder or output folder. Feel free to do so with below command format
 ```

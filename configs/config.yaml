@@ -7,7 +7,8 @@ num_channels: 1
 # Model 
 model: fcn      # cnn, vit, fcn or hybrid
 pretrain: False 
-dataset_mode : ck_plus  #can be either all, ck_plus or affectnet 
+dataset_mode : affectnet #can be either all, ck_plus or affectnet 
+load_model: training/trained_models/lenet/08_01__00_40_24/model/model.pth
 
 # ViT specifics
 patch_size: 8
@@ -25,7 +26,7 @@ lr: .0001
 
 # FCN specifics
 fcn_feature_dim: 256
-combine_alpha: 0.1
+combine_alpha: 0.4
 combine_beta: 0.8
 
 # augmentations specifics

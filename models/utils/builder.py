@@ -1,6 +1,8 @@
 from models import ViT
 from models import FCN
 from models import CNN_LeNet
+import torch
+import os
 
 def get_model(args, pretrained_encoder=None):
     match args.model:
@@ -21,8 +23,17 @@ def get_model(args, pretrained_encoder=None):
                                output_dim=args.num_classes)
         case 'lenet':
             model = CNN_LeNet.LeNet5(num_classes= args.num_classes)
+            
+      
+        
         case _:
             raise NotImplementedError
+    
+    if args.load_model:
+        if not os.path.exists(args.load_model):
+            raise FileNotFoundError(f"Model not found at {args.load_model}. Train the model first!")
+        else:
+            model=torch.load(args.load_model, map_location=args.device)
         
         
     return model

@@ -5,7 +5,7 @@ image_size: 64
 num_channels: 1     
 
 # Model 
-model: fcn      # cnn, vit, fcn or hybrid
+model: vit     # cnn, vit, fcn or hybrid
 pretrain: False 
 dataset_mode : affectnet #can be either all, ck_plus or affectnet 
 load_model: training/trained_models/lenet/08_01__00_40_24/model/model.pth
@@ -45,3 +45,15 @@ output_csv: emotion_predictions.csv
 
 # visualization
 blur_size: 7
+
+#Torch Resnet
+torch_resnet:
+  model_type: resnet18 #resnet18, resnet34, resnet50, resnet101, resnet152
+  pretrained: False
+  input_channels: 1
+  num_classes: 6
+
+#Resnet
+resnet:
+  num_classes: 6
+  input_channels: 1

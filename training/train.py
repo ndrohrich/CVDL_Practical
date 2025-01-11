@@ -125,7 +125,7 @@ class Trainer():
         with tqdm(self.dataloader_train) as iterator: 
             step = 0
             for images, targets in iterator: 
-                images, targets = images.to(self.args.device), targets.to(self.args.device)
+                images, targets = images.to(self.device), targets.to(self.device)
 
                 loss, outputs = self.train_one_epoch(images, targets)
                 accuracy = self.get_accuracy(outputs, targets)
@@ -137,7 +137,7 @@ class Trainer():
                 with torch.no_grad():
                     if self.args.model == 'fcn':
                         if step % 80 == 0:
-                            features = self.feature_extractor(self.dataloader_test.dataset[3][0].unsqueeze(0).to(self.args.device))
+                            features = self.feature_extractor(self.dataloader_test.dataset[3][0].unsqueeze(0).to(self.device))
                             self.writer.add_images('Features', features, self.epoch*len(self.dataloader_train)+step)
             
                 step += 1
@@ -145,7 +145,7 @@ class Trainer():
         # Test one epoch
         with tqdm(self.dataloader_test) as iterator: 
             for images, targets in iterator: 
-                images, targets = images.to(self.args.device), targets.to(self.args.device)
+                images, targets = images.to(self.device), targets.to(self.device)
 
                 loss, outputs = self.test_one_epoch(images, targets)
                 accuracy = self.get_accuracy(outputs, targets)
@@ -154,8 +154,8 @@ class Trainer():
                 running_accuracy_test += accuracy
                 
         # log activation maps
-        features = next(iter(self.dataloader_test))[0].to(self.args.device)
-        labels = next(iter(self.dataloader_test))[1].to(self.args.device)
+        features = next(iter(self.dataloader_test))[0].to(self.device)
+        labels = next(iter(self.dataloader_test))[1].to(self.device)
         self.log_activation_maps(self.epoch, features, labels)
         
         

@@ -11,7 +11,7 @@ dataset_mode : ck_plus  #can be either all, ck_plus or affectnet
 
 # ViT specifics
 patch_size: 8
-depth: 32
+depth: 12
 embed_dim: 64
 num_heads: 4
 

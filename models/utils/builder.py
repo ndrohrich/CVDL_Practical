@@ -4,6 +4,7 @@ from models import CNN_LeNet
 from models import CNN_VGG
 from models import CNN_ResNet
 from models import CNN_TorchResnet
+from models import Hybrid
 
 def get_model(args, pretrained_encoder=None):
     if args.model == 'vit': 
@@ -34,6 +35,12 @@ def get_model(args, pretrained_encoder=None):
             pretrained=args.torch_resnet.pretrained,
             input_channels=args.torch_resnet.input_channels
             )
+    elif args.model == 'hybrid': 
+        model = Hybrid.Hybrid(num_classes=args.num_classes, 
+                              input_channels=args.num_channels, 
+                              depth=args.depth, 
+                              embed_dim=args.embed_dim,
+                              num_heads=args.num_heads)
     else:
             raise NotImplementedError
         

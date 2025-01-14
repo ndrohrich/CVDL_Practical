@@ -42,24 +42,20 @@ class Trainer():
         self.num_parameters = sum(p.numel() for p in self.model.parameters())
         
         # if using the model need discriminativ loss,else use cross entropy loss
-        if self.args.model == 'fcn': # decide which discriminative loss to use
+        if self.args.model == 'fcn' or self.args.model == 'ACN':
             print('Using discriminative loss')
             self.loss = discriminativ_loss.combined_loss(feature_dim=self.args.fcn_feature_dim, 
                                                           num_classes=self.args.num_classes, 
                                                           alpha=self.args.combine_alpha, 
                                                           beta=self.args.combine_beta)
-            # also need to use the feature extractor
-            self.feature_extractor = self.use_hook(self.model)
-            
-            
-            
-        
-            
         else:
             self.loss = nn.CrossEntropyLoss()
         self.optimizer = optim.AdamW(params=self.model.parameters(), 
                                      lr=self.args.lr)
         self._to_device()
+        
+        # assign feature extractor
+        self.feature_extractor = self.use_hook(self.model)
         
         # Create directories, init writer 
         self._make_model_dirs()
@@ -135,9 +131,9 @@ class Trainer():
                 
                 # Log features to tensorboard as images
                 with torch.no_grad():
-                    if self.args.model == 'fcn':
+                    if self.args.model == 'fcn' or self.args.model == 'torch_resnet' or self.args.model == 'ACN':
                         if step % 80 == 0:
-                            features = self.feature_extractor(self.dataloader_test.dataset[3][0].unsqueeze(0).to(self.args.device))
+                            features = self.feature_extractor(self.dataloader_test.dataset[1][0].unsqueeze(0).to(self.args.device))
                             self.writer.add_images('Features', features, self.epoch*len(self.dataloader_train)+step)
             
                 step += 1
@@ -182,8 +178,10 @@ class Trainer():
         self.model.train()
         # Clear Previous gradients 
         self.model.zero_grad()
+        self.optimizer.zero_grad()
+
         
-        if self.args.model=="fcn":
+        if self.args.model=="fcn" or self.args.model=="ACN":
             features,outputs=self.model(inputs)
             loss=self.loss(features,outputs,targets)
         else:
@@ -203,7 +201,7 @@ class Trainer():
     def test_one_epoch(self, inputs, targets):
         self.model.eval()
         with torch.no_grad(): # No need to compute gradients for validation
-            if self.args.model=="fcn":
+            if self.args.model=="fcn" or self.args.model=="ACN":
                 features,outputs=self.model(inputs)
                 loss=self.loss(features,outputs,targets)
             else:
@@ -214,8 +212,18 @@ class Trainer():
                 loss = self.loss(outputs, targets)
         return loss, outputs 
     
-    def use_hook(self, model):
-        feature_extractor = FeatureExtractor(model)
+    def use_hook(self, model, layer=None):
+        feature_extractor = None
+        match self.args.model:
+            case 'fcn':
+                layer = model.layer1
+            case 'torch_resnet':
+                layer = model.model.layer2
+            case 'ACN':
+                layer = model.after_attention
+            case _:
+                return None
+        feature_extractor = FeatureExtractor(model, layer)
         return feature_extractor
     
     def get_accuracy(self, outputs, targets):

@@ -29,7 +29,7 @@ def visualize_gradients(model, img, label, cfg):
     model.zero_grad()
 
     # Forward pass
-    if cfg.model == "fcn":
+    if cfg.model == "fcn" or cfg.model == "ACN":
         features, output = model(img)
     else:
         output = model(img)

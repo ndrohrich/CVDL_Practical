@@ -10,3 +10,4 @@ kagglehub
 datasets
 tensorboard
 scikit-learn
+flask

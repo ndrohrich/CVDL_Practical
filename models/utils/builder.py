@@ -6,6 +6,7 @@ import os
 from models import CNN_VGG
 from models import CNN_ResNet
 from models import CNN_TorchResnet
+from models import ACN
 
 def get_model(args, pretrained_encoder=None):
     match args.model:
@@ -24,12 +25,17 @@ def get_model(args, pretrained_encoder=None):
                                in_chanel=args.num_channels,
                                feature_dim=args.fcn_feature_dim, 
                                output_dim=args.num_classes)
+            
+        case 'ACN':
+            model = ACN.AttentionFeatureCluster(patch_size=8, 
+                                                 feature_size=64, 
+                                                 num_classes=args.num_classes)
         case 'lenet':
             model = CNN_LeNet.LeNet5(num_classes= args.num_classes)
         case 'vgg':
             model = CNN_VGG.VGG(num_classes= args.num_classes, input_channels= args.num_channels)
         case 'resnet':
-            model = CNN_ResNet.ResNet18(num_classes= args.num_classes)
+            model = CNN_ResNet.ResNet50(num_classes= args.num_classes)
         case 'torch_resnet':
             model = CNN_TorchResnet.TorchVisionResNet(
                 model_type=args.torch_resnet.model_type,
@@ -37,14 +43,16 @@ def get_model(args, pretrained_encoder=None):
                 pretrained=args.torch_resnet.pretrained,
                 input_channels=args.torch_resnet.input_channels
             )
+            print("Model parameters:")
+            for name, param in model.named_parameters():
+                print(f"{name}: {param.size()}")
         case _:
             raise NotImplementedError
     
     if args.load_model:
-        if not os.path.exists(args.load_model):
-            raise FileNotFoundError(f"Model not found at {args.load_model}. Train the model first!")
-        else:
-            model=torch.load(args.load_model, map_location=args.device)
-        
-        
+        if not args.load_model=='false':
+            if not os.path.exists(args.load_model):
+                raise FileNotFoundError(f"Model not found at {args.load_model}. Train the model first!")
+            else:
+                model=torch.load(args.load_model, map_location=args.device)
     return model

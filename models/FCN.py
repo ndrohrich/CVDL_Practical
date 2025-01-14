@@ -129,11 +129,12 @@ class ResNet(nn.Module):
 
 #  Define hook for feature extraction
 class FeatureExtractor:
-    def __init__(self, model):
+    def __init__(self, model, layer):
         self.model = model
         self.features = None
         self.gradients = None
-        self.hook = self.model.layer1.register_forward_hook(self.hook_fn)
+        target_layer = layer
+        self.hook = target_layer.register_forward_hook(self.hook_fn)
     
     def hook_fn(self, module, input, output):
   
@@ -153,79 +154,3 @@ class FeatureExtractor:
         self.model(x)
         #print(f"features shape: {self.features.shape}")
         return self.features
-    
-
-import torch
-import torch.nn.functional as F
-from torchvision import models, transforms
-import numpy as np
-import cv2
-
-class GradCAM:
-    def __init__(self, model, target_layer_names, use_cuda=False):
-        """
-        Args:
-            model (nn.Module): The model to inspect.
-            target_layer_names (list): List of layer names to target.
-            use_cuda (bool): Whether to use CUDA.
-        """
-        self.model = model
-        self.model.eval()
-        self.cuda = use_cuda
-        if self.cuda:
-            self.model = model.cuda()
-
-        self.target_layers = target_layer_names
-        self.feature_maps = {}
-        self.gradients = {}
-
-        # Register hooks
-        for name, module in self.model.named_modules():
-            if name in self.target_layers:
-                module.register_forward_hook(self.save_feature_maps(name))
-                module.register_backward_hook(self.save_gradients(name))
-
-    def save_feature_maps(self, layer_name):
-        def hook(module, input, output):
-            self.feature_maps[layer_name] = output.detach()
-        return hook
-
-    def save_gradients(self, layer_name):
-        def hook(module, grad_input, grad_output):
-            self.gradients[layer_name] = grad_output[0].detach()
-        return hook
-
-    def forward(self, input):
-        return self.model(input)
-
-    def __call__(self, input, index=None):
-        if self.cuda:
-            input = input.cuda()
-        
-        output = self.forward(input)[1]
-
-        if index is None:
-            index = torch.argmax(output, dim=1)
-
-        # Zero grads
-        self.model.zero_grad()
-
-        # One-hot for the target class
-        one_hot = torch.zeros_like(output)
-        one_hot.scatter_(1, index.view(-1,1), 1.0)
-
-        # Backward pass
-        output.backward(gradient=one_hot, retain_graph=True)
-
-        cam_dict = {}
-        for layer_name in self.target_layers:
-            gradients = self.gradients[layer_name]  # [N, C, H, W]
-            activations = self.feature_maps[layer_name]  # [N, C, H, W]
-            weights = torch.mean(gradients, dim=(2, 3), keepdim=True)  # [N, C, 1, 1]
-            cam = torch.sum(weights * activations, dim=1, keepdim=True)  # [N, 1, H, W]
-            cam = F.relu(cam)
-            # Normalize CAM
-            cam = cam - cam.min(dim=2, keepdim=True)[0].min(dim=3, keepdim=True)[0]
-            cam = cam / (cam.max(dim=2, keepdim=True)[0].max(dim=3, keepdim=True)[0] + 1e-8)
-            cam_dict[layer_name] = cam
-        return cam_dict

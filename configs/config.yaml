@@ -5,14 +5,14 @@ image_size: 64
 num_channels: 1     
 
 # Model 
-model: vit     # cnn, vit, fcn or hybrid
+model: lenet     # cnn, vit, fcn or hybrid
 pretrain: False 
-dataset_mode : affectnet #can be either all, ck_plus or affectnet 
-load_model: training/trained_models/lenet/08_01__00_40_24/model/model.pth
+dataset_mode : fer #can be either all, ck_plus or affectnet 
+load_model: false
 
 # ViT specifics
 patch_size: 8
-depth: 32
+depth: 12
 embed_dim: 64
 num_heads: 4
 
@@ -21,13 +21,13 @@ num_classes: 6
 batch_size: 16
 cuda: True 
 device: cuda
-epochs: 10
+epochs: 100
 lr: .0001
 
 # FCN specifics
 fcn_feature_dim: 256
-combine_alpha: 0.4
-combine_beta: 0.8
+combine_alpha: 0.8
+combine_beta: 0.3
 
 # augmentations specifics
 probability: 0.5
@@ -48,7 +48,7 @@ blur_size: 7
 
 #Torch Resnet
 torch_resnet:
-  model_type: resnet18 #resnet18, resnet34, resnet50, resnet101, resnet152
+  model_type: resnet50 #resnet18, resnet34, resnet50, resnet101, resnet152
   pretrained: False
   input_channels: 1
   num_classes: 6

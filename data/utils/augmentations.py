@@ -90,7 +90,6 @@ def randomErasing_flip_rotate_transforms(cfg):
     train_transforms = tf.Compose([tf.Resize((64,64)),
                                    tf.Grayscale(),
                                    tf.RandomHorizontalFlip(p=cfg.probability),
-                                   tf.RandomRotation(degrees=cfg.rotation_angle),
                                    tf.ToTensor(),
                                    tf.RandomErasing(cfg.probability, scale=(cfg.min_area, cfg.max_area), ratio=(cfg.min_aspect_ratio, cfg.max_aspect_ratio))])
     test_transforms = tf.Compose([tf.Resize((64,64)),

@@ -30,7 +30,7 @@ class FER2013(Dataset):
         __getitem__(idx): Returns the image and label at the specified index.
     """
     
-    def __init__(self,transform=None,split='train',cache=False):
+    def __init__(self,transform=None,split='train',cache=True):
         super().__init__()
         if not split in ['train','test']:
             raise ValueError("Invalid split, choose from 'train' or 'test'")
@@ -67,13 +67,8 @@ class FER2013(Dataset):
                 images=os.listdir(os.path.join(self.splitdatapath,i))
                 print(f"Loading images from {i} class")
                 for img in tqdm(images):
-                    if self.transform:
-                        img=self.transform(Image.open(os.path.join(self.splitdatapath,i,img)))
-                        self.datas.append(img)
-                    else:
-                        img=Image.open(os.path.join(self.splitdatapath,i,img))
-                        img=torch.tensor(np.array(img))
-                        self.datas.append(img)
+                    img=Image.open(os.path.join(self.splitdatapath,i,img))
+                    self.datas.append(img)
           
                     
                     #one hot encoding
@@ -81,7 +76,7 @@ class FER2013(Dataset):
                     _label[self.emoclass.index(i)]=1
                     self.labels.append(_label)
                     
-            self.datas=torch.stack(self.datas)
+            # self.datas=torch.stack(self.datas)
             self.labels=torch.stack(self.labels)  
         
     def __len__(self):
@@ -89,7 +84,7 @@ class FER2013(Dataset):
     
     def __getitem__(self,idx):
         if self.cache:
-            return self.datas[idx],self.labels[idx]
+            return self.transform(self.datas[idx]),self.labels[idx]
         else:
             for i in self.emoclass:
                 images=os.listdir(os.path.join(self.splitdatapath,i))

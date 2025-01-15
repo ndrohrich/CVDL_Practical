@@ -67,8 +67,10 @@ class Trainer():
         logging.basicConfig(level=logging.INFO)
         
     def _init_transforms(self): 
-        transforms = augmentations.init_transforms(self.args)
-        transforms = augmentations.randomErasing_transforms(self.args)
+        if self.args.augments:
+            transforms = augmentations.randomErasing_transforms(self.args)
+        else: 
+            transforms = augmentations.init_transforms(self.args)
         self.train_transforms = transforms['train']
         self.test_transforms = transforms['test']
 

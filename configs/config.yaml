@@ -29,6 +29,7 @@ combine_alpha: 0.1
 combine_beta: 0.8
 
 # augmentations specifics
+augments: False 
 probability: 0.5
 min_area: 0.02
 max_area: 0.10

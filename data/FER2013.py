@@ -67,16 +67,13 @@ class FER2013(Dataset):
                 images=os.listdir(os.path.join(self.splitdatapath,i))
                 print(f"Loading images from {i} class")
                 for img in tqdm(images):
-                    img=Image.open(os.path.join(self.splitdatapath,i,img))
-                    self.datas.append(img)
-          
-                    
+                    with Image.open(os.path.join(self.splitdatapath,i,img)) as im:
+                        im.load()
+                        self.datas.append(im.copy())
                     #one hot encoding
                     _label=torch.zeros(len(self.emoclass))
                     _label[self.emoclass.index(i)]=1
                     self.labels.append(_label)
-                    
-            # self.datas=torch.stack(self.datas)
             self.labels=torch.stack(self.labels)  
         
     def __len__(self):

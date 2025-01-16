@@ -73,8 +73,8 @@ class Trainer():
         dataset_train = dataset['train']
         dataset_test = dataset['test']
 
-        self.dataloader_train = DataLoader(dataset=dataset_train, batch_size=self.args.batch_size, shuffle=True)
-        self.dataloader_test = DataLoader(dataset=dataset_test, batch_size=self.args.batch_size, shuffle=False)
+        self.dataloader_train = DataLoader(dataset=dataset_train, batch_size=self.args.batch_size, shuffle=True, num_workers=self.args.num_workers)
+        self.dataloader_test = DataLoader(dataset=dataset_test, batch_size=self.args.batch_size, shuffle=False, num_workers=self.args.num_workers)
 
     def _to_device(self):
         device = self.device

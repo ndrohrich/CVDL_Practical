@@ -6,8 +6,13 @@ import os
 from models import CNN_VGG
 from models import CNN_ResNet
 from models import CNN_TorchResnet
+<<<<<<< HEAD
 from models import ACN
 from models import Hybrid
+=======
+from models import Hybrid_Simple_Stack
+from models import Hybrid_Alternating
+>>>>>>> origin/main
 
 def get_model(args, pretrained_encoder=None):
     if args.model == 'vit': 
@@ -43,11 +48,20 @@ def get_model(args, pretrained_encoder=None):
             input_channels=args.torch_resnet.input_channels
             )
     elif args.model == 'hybrid': 
-        model = Hybrid.Hybrid(num_classes=args.num_classes, 
-                              input_channels=args.num_channels, 
-                              depth=args.depth, 
-                              embed_dim=args.embed_dim,
-                              num_heads=args.num_heads)
+        model = Hybrid_Simple_Stack.Hybrid(
+             num_classes=args.num_classes, 
+             input_channels=args.num_channels, 
+             depth=args.depth, 
+             embed_dim=args.embed_dim,
+             num_heads=args.num_heads)
+    elif args.model == 'hybrid_alternating': 
+        model = Hybrid_Alternating.Hybrid(
+             num_classes=args.num_classes, 
+             input_channels=args.num_channels, 
+             depth=args.depth, 
+             embed_dim=args.embed_dim,
+             num_heads=args.num_heads
+        )
     else:
             raise NotImplementedError
     

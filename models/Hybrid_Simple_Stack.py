@@ -53,33 +53,30 @@ class CNN_encoder(nn.Module):
     def __init__(self, input_channels=1):
         super().__init__()
         self.layer1 = nn.Sequential(
-                nn.Conv2d(input_channels, 64, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(64),
+                nn.Conv2d(input_channels, 8, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(8),
                 nn.ReLU()
             )
         self.layer2 = nn.Sequential(
-            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
+            nn.Conv2d(8, 16, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(16),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+
+        self.layer3 = nn.Sequential(
+            nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(32),
+            nn.ReLU()
+        )
+        self.layer4 = nn.Sequential(
+            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(64),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
-        self.layer3 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU()
-        )
-        self.layer4 = nn.Sequential(
-            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(128),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
-        )
-        self.layer5 = nn.Sequential(
-            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(256),
-            nn.ReLU()
-        )
+    
     def forward(self, x):
-        output = self.layer5(self.layer4(self.layer3(self.layer2(self.layer1(x)))))
+        output = self.layer4(self.layer3(self.layer2(self.layer1(x))))
         return output 
     

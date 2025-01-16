@@ -64,7 +64,7 @@ class Trainer():
         
     def _init_transforms(self): 
         transforms = augmentations.init_transforms(self.args)
-        transforms = augmentations.randomErasing_transforms(self.args)
+        transforms = augmentations.random_Erasing_flip_Brightness_Contrast_transforms(self.args)
         self.train_transforms = transforms['train']
         self.test_transforms = transforms['test']
 

@@ -6,6 +6,9 @@ from RealTimeDemoandImageCSV.RealTimeEmotionDetector import RealTimeEmotionDetec
 import os
 import torch
 
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'  #Tensorflow oneDNN optimisaitons
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
+
 
 @hydra.main(version_base=None, config_path="configs", config_name="config")
 def main(cfg):
@@ -20,7 +23,7 @@ def main(cfg):
         # Image processing mode
         process_images(cfg)
 
-    elif cfg.mode == "realtime_detection":
+    elif cfg.mode in ["realtime_detection", "realtime_gradient"]:
         realtime_emotion_detection(cfg)
         
     else:
@@ -43,7 +46,7 @@ def get_model_path(cfg):
     if not subfolders:
         raise FileNotFoundError(f"No trained model subfolders found for {cfg.model} in {base_folder}")
     
-    # Sort subfolders by modification time (most recent first)
+    # Sort subfolders by most recent modifcation
     subfolders.sort(key=lambda x: os.path.getmtime(x), reverse=True)
     
     # find model.path
@@ -52,7 +55,7 @@ def get_model_path(cfg):
         if os.path.exists(model_file):
             return model_file
     
-    # If no model is found
+    
     raise FileNotFoundError(f"No model.pth file found for {cfg.model} in {base_folder}")
 
 def process_images(cfg):
@@ -97,7 +100,7 @@ def realtime_emotion_detection(cfg):
     emotion_labels = ['happy', 'surprise', 'sadness', 'anger', 'disgust', 'fear']
 
     # Initialize RealTimeEmotionDetector
-    detector = RealTimeEmotionDetector(model, transform, emotion_labels)
+    detector = RealTimeEmotionDetector(model, transform, emotion_labels, mode=cfg.mode, cfg=cfg)
 
     # Start the real-time detection
     detector.detect_emotion()

@@ -74,10 +74,12 @@ python main.py mode=process_csv model=vit image_folder=./RealTimeDemoandImageCSV
 ```
 Step 3: (Realtime Face Demo)
 
-Same as Image Processing, but mode=realtime_detection
+Same as Image Processing, but mode=realtime_detection (for normal emotion detection), mode=realtime_gradient (for activation maps)
 
 ```
 python main.py model=vit mode=realtime_detection
+
+python main.py model=vit mode=realtime_gradient
 ```
 
 Step 4:(Feature maps and Highlights)

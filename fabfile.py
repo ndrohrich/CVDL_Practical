@@ -18,10 +18,11 @@ remote_dir = 'work/remote'
 repo_url = 'https://github.com/ndrohrich/CVDL_Practical.git'
 local_config_path = 'configs/config.yaml'
 remote_config_path = 'work/remote/configs/config.yaml'
+analysis = True
 
 def establish_base_connection(user):
     """
-    Establish a base connection to the remote host.
+    Establish a base connection to the remote host.fa
 
     Args:
         user (str): Username for the remote host.
@@ -90,7 +91,7 @@ def analyse_gpu(conn):
         return "N/A"
 
 @task
-def connect(c, user, analysis):
+def connect(c, user):
     """
     Connect to a remote node and optionally analyse GPU usage.
 
@@ -212,7 +213,11 @@ def update(c, user):
         # Check the remote config file
         if not base_conn.run(f'test -f {remote_config_path}', warn=True).ok:
             print(f"Remote config file {remote_config_path} not found")
-            sys.exit(1)
+            clone=input(f"di you want to clone the repo to {remote_dir}? (y/n): ")
+            if clone.lower() == 'y':
+                deploy(c, user)
+            else:
+                sys.exit(1)
         
         # Update the remote config file
         base_conn.put(local_config_path, remote_config_path)
@@ -221,6 +226,17 @@ def update(c, user):
         print(f"Failed to update: {e}")
     finally:
         base_conn.close()
+
+@task
+def webdemo(c,model_path):
+    """
+    Run the web demo.
+
+    Args:
+        c (Connection): Fabric connection object.
+        model_path (str): Path to the model file.
+    """
+    c.run(f"python3 app.py {model_path}")
 
 @task
 def help(c):
@@ -233,6 +249,17 @@ def help(c):
       deploy  {str:user}                - Deploy the repository
       clean   {str:user}                - Clean the remote directory
       update  {str:user}                - Update the remote config file
+      webdemo {str:model_path}          - Run the web demo for FER Classification
       help                              - Show this message
     """
     print(usage_info)
+
+
+def setup_local_gitserver():
+    """
+    Setup a local git server.
+    """
+    os.system('git init --bare /tmp/gitserver')
+    os.system('git clone /tmp/gitserver /tmp/gitclient')
+    os.system('echo "Hello, World!" > /tmp/gitclient/hello.txt')
+    os.system('cd /tmp/gitclient && git add hello.txt && git commit -m "Initial commit" && git push origin master')

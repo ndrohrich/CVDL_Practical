@@ -6,13 +6,8 @@ import os
 from models import CNN_VGG
 from models import CNN_ResNet
 from models import CNN_TorchResnet
-<<<<<<< HEAD
-from models import ACN
-from models import Hybrid
-=======
 from models import Hybrid_Simple_Stack
 from models import Hybrid_Alternating
->>>>>>> origin/main
 
 def get_model(args, pretrained_encoder=None):
     if args.model == 'vit': 

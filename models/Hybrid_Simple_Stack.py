@@ -19,7 +19,7 @@ class Hybrid(nn.Module):
                                       nn.ReLU(), 
                                       nn.Linear(in_features=embed_dim, out_features=num_classes))
         self.cls_token = nn.Parameter(data=torch.randn(1, 1, embed_dim))
-        self.projection_layer = nn.Linear(in_features=256, out_features=embed_dim)
+        self.projection_layer = nn.Linear(in_features=64, out_features=embed_dim)
 
         
     def forward(self, x):
@@ -75,8 +75,29 @@ class CNN_encoder(nn.Module):
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
+        self.layer5 = nn.Sequential(
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU()
+        )
+        self.layer6 = nn.Sequential(
+            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.layer7 = nn.Sequential(
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU()
+        )
+        self.layer8 = nn.Sequential(
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU()
+        )
     
     def forward(self, x):
-        output = self.layer4(self.layer3(self.layer2(self.layer1(x))))
+        output = self.layer6(self.layer5(self.layer4(self.layer3(self.layer2(self.layer1(x))))))
         return output 
     

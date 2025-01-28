@@ -2,12 +2,6 @@ import torch
 from torchvision.transforms import functional as TF
 import numpy as np
 
-def visualize_gradients(model, img, label, cfg):
-    # Get blur size from cfg
-    blur_size = cfg.blur_size
-import cv2
-import numpy as np
-import torch
 
 
 def visualize_gradients(model, img, label, cfg):

@@ -1,6 +1,7 @@
 from torchvision import transforms as tf
 import numpy as np
 import torch
+import random
 
 
 def init_transforms(cfg): 
@@ -181,3 +182,63 @@ def Er_Br_Con_hog_transforms(cfg):
     
     return transforms
 
+def random_half_black(image,p=0.5):
+    """
+    Randomly black out half of the image.
+    
+    Parameters
+    ----------
+    image: torch.Tensor
+        Input image tensor.
+    
+    Returns
+    -------
+    torch.Tensor
+        Transformed image tensor.
+    """
+    # Get image dimensions
+    _, h, w = image.shape
+    
+    # Randomly choose which half to black out
+    if random.random() < p:
+        # Black out the left half
+        image[:, :, :w//2] = 0
+    else:
+        # Black out the right half
+        image[:, :, w//2:] = 0
+    
+    return image
+
+def random_half_transforms(cfg):
+    '''
+    Takes arguments specified in command line via hydra and returns 
+    train and test transforms using torch transforms, including random half-black augmentation.
+    
+    Parameters
+    ----------
+    cfg: OmegaConf
+        Hyperparameters parsed via command-line using hydra.
+    
+    Returns
+    -------
+    dict
+        Dictionary containing 'train' and 'test' transforms.
+    '''
+    
+    train_transforms = tf.Compose([
+        tf.Resize((64, 64)),
+        tf.Grayscale(),
+        tf.ToTensor(),
+        tf.Lambda(lambda x: random_half_black(x,cfg.probability))
+    ])
+    
+    test_transforms = tf.Compose([
+        tf.Resize((64, 64)),
+        tf.Grayscale(),
+        tf.ToTensor()
+    ])
+
+    transforms = {'train': train_transforms, 
+                  'test': test_transforms}
+    
+    return transforms

@@ -1,6 +1,4 @@
 import torch.nn as nn
-import os 
-print(os.getcwd())
 from models.Blocks import Transformer_Encoder
 
 '''

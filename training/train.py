@@ -63,8 +63,10 @@ class Trainer():
         logging.basicConfig(level=logging.INFO)
         
     def _init_transforms(self): 
-        transforms = augmentations.init_transforms(self.args)
-        transforms = augmentations.random_Erasing_flip_Brightness_Contrast_transforms(self.args)
+        if self.args.augments: 
+            transforms = augmentations.random_Erasing_flip_Brightness_Contrast_transforms(self.args)
+        else:
+            transforms = augmentations.init_transforms(self.args)
         self.train_transforms = transforms['train']
         self.test_transforms = transforms['test']
 
@@ -87,11 +89,14 @@ class Trainer():
         now = now.strftime("%d_%m__%H_%M_%S")
         log_dir = os.path.join(cwd, 'training', 'trained_models', self.args.model, now, 'logs')
         model_dir = os.path.join(cwd, 'training', 'trained_models', self.args.model, now, 'model')
+        checkpoint_dir = os.path.join(cwd, 'training', 'trained_models', self.args.model, now, 'checkpoints')
+
 
         os.makedirs(log_dir)
         os.makedirs(model_dir)
 
         self.model_dir = model_dir
+        self.checkpoint_dir = checkpoint_dir 
         self.log_dir = log_dir
 
     def pretrain(self):
@@ -104,7 +109,13 @@ class Trainer():
             logging_metrics = self.train_test_one_epoch()
             self.log_metrics(epoch, logging_metrics)
             self.writer.flush()
+            if epoch % 10 == 0:
+                self._save_checkpoint(epoch)
         self._save_model()
+
+    def _save_model(self,epoch): 
+        torch.save(self.model, os.path.join(self.checkpoint_dir, f'model_{epoch}_epochs.pth'))
+        print(f'SAVED FINAL MODEL TO DIR: {self.checkpoint_dir}')
 
     def _save_model(self): 
         torch.save(self.model, os.path.join(self.model_dir, 'model.pth'))

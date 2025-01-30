@@ -45,6 +45,7 @@ contrast : [0.2, 2.0]
 mode: train #can be train, realtime_detection or process_csv, by default train
 image_folder: 'RealTimeDemoAndImageCSV/TestImagesFolder'
 output_csv: emotion_predictions.csv
+custom_model_path: ""
 
 
 # visualization

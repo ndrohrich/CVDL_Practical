@@ -34,6 +34,13 @@ def get_model_path(cfg):
     """
     Dynamically determine the path to the trained model based on cfg.model.
     """
+    # Check if a saved trained model path is provided
+    if cfg.get("custom_model_path"):
+        custom_model_path = cfg.custom_model_path
+        if not os.path.exists(custom_model_path):
+            raise FileNotFoundError(f"Custom model not found at {custom_model_path}")
+        print(f"Using custom model path: {custom_model_path}")
+        return custom_model_path
     
     base_folder = f"./training/trained_models/{cfg.model}"
     

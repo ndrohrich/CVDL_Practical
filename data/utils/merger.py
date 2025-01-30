@@ -63,7 +63,7 @@ def merge_all_datasets(cfg, train_transforms, test_transforms):
         # Merge datasets
         train_dataset.append(train_dataset1)
         train_dataset.append(train_dataset2)
-        test_dataset.append(train_dataset3)
+        train_dataset.append(train_dataset3)
 
         test_dataset.append(test_dataset1)
         test_dataset.append(test_dataset2)

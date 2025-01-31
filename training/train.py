@@ -115,9 +115,9 @@ class Trainer():
                 self._save_checkpoint(epoch)
         self._save_model()
 
-    def _save_model(self,epoch): 
+    def _save_checkpoint(self,epoch): 
         torch.save(self.model, os.path.join(self.checkpoint_dir, f'model_{epoch}_epochs.pth'))
-        print(f'SAVED FINAL MODEL TO DIR: {self.checkpoint_dir}')
+        print(f'SAVED CHECKPOINT TO DIR: {self.checkpoint_dir}')
 
     def _save_model(self): 
         torch.save(self.model, os.path.join(self.model_dir, 'model.pth'))

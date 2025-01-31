@@ -202,11 +202,19 @@ def random_half_black(image,p=0.5):
     # Randomly choose which half to black out
     if random.random() < p:
         # Black out the left half
-        image[:, :, :w//2] = 0
+        p=random.random()
+        if p<0.5:
+            image[:, :, :w//2] = 0 #black out left half
+        else: # black out upper half
+            image[:, :h//2, :] = 0
+        
     else:
         # Black out the right half
-        image[:, :, w//2:] = 0
-    
+        p=random.random()
+        if p<0.5:
+            image[:, w//2:, :] = 0
+        else: # black out lower half
+            image[h//2:, :, :] = 0
     return image
 
 def random_half_transforms(cfg):

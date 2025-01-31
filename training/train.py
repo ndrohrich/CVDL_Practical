@@ -42,7 +42,7 @@ class Trainer():
         self.num_parameters = sum(p.numel() for p in self.model.parameters())
         
         # if using the model need discriminativ loss,else use cross entropy loss
-        if self.args.model == 'fcn' or self.args.model == 'ACN':
+        if self.args.model == 'fcn' or self.args.model == 'ACN' or self.args.model == 'hybrid_fcn':
             print('Using discriminative loss')
             self.loss = discriminativ_loss.combined_loss(feature_dim=self.args.fcn_feature_dim, 
                                                           num_classes=self.args.num_classes, 
@@ -75,6 +75,8 @@ class Trainer():
 
         self.dataloader_train = DataLoader(dataset=dataset_train, batch_size=self.args.batch_size, shuffle=True, num_workers=self.args.num_workers)
         self.dataloader_test = DataLoader(dataset=dataset_test, batch_size=self.args.batch_size, shuffle=False, num_workers=self.args.num_workers)
+        
+        print(f"image size: {next(iter(self.dataloader_train))[0].shape}")
 
     def _to_device(self):
         device = self.device
@@ -129,12 +131,12 @@ class Trainer():
                 running_loss_train += loss
                 running_accuracy_train += accuracy
                 
-                # Log features to tensorboard as images
-                with torch.no_grad():
-                    if self.args.model == 'fcn' or self.args.model == 'torch_resnet' or self.args.model == 'ACN':
-                        if step % 80 == 0:
-                            features = self.feature_extractor(self.dataloader_test.dataset[3][0].unsqueeze(0).to(self.device))
-                            self.writer.add_images('Features', features, self.epoch*len(self.dataloader_train)+step)
+                # # Log features to tensorboard as images
+                # with torch.no_grad():
+                #     if self.args.model == 'fcn' or self.args.model == 'torch_resnet' or self.args.model == 'ACN':
+                #         if step % 80 == 0:
+                #             features = self.feature_extractor(self.dataloader_test.dataset[3][0].unsqueeze(0).to(self.device))
+                #             self.writer.add_images('Features', features, self.epoch*len(self.dataloader_train)+step)
             
                 step += 1
 
@@ -184,6 +186,11 @@ class Trainer():
         if self.args.model=="fcn" or self.args.model=="ACN":
             features,outputs=self.model(inputs)
             loss=self.loss(features,outputs,targets)
+        if self.args.model=='hybrid_fcn':
+            outputs = self.model(inputs)
+            features = self.model.features
+            features = features.view(features.size(0), -1)
+            loss = self.loss(features, outputs, targets)
         else:
             # Forward pass
             outputs = self.model(inputs)
@@ -204,6 +211,11 @@ class Trainer():
             if self.args.model=="fcn" or self.args.model=="ACN":
                 features,outputs=self.model(inputs)
                 loss=self.loss(features,outputs,targets)
+            elif self.args.model=='hybrid_fcn':
+                outputs = self.model(inputs)
+                features = self.model.features
+                features = features.view(features.size(0), -1)
+                loss = self.loss(features, outputs, targets)
             else:
                 # Forward pass
                 outputs = self.model(inputs)

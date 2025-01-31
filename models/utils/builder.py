@@ -50,6 +50,7 @@ def get_model(args, pretrained_encoder=None):
              embed_dim=args.embed_dim,
              num_heads=args.num_heads)
     elif args.model == 'hybrid_alternating': 
+        print('Using Hybrid Alternating model')
         model = Hybrid_Alternating.Hybrid(
              num_classes=args.num_classes, 
              input_channels=args.num_channels, 
@@ -57,6 +58,13 @@ def get_model(args, pretrained_encoder=None):
              embed_dim=args.embed_dim,
              num_heads=args.num_heads
         )
+    elif args.model == 'hybrid_fcn':
+        model = Hybrid_Simple_Stack.Hybrid(
+             num_classes=args.num_classes, 
+             input_channels=args.num_channels, 
+             depth=args.depth, 
+             embed_dim=args.embed_dim,
+             num_heads=args.num_heads)
     else:
             raise NotImplementedError
     

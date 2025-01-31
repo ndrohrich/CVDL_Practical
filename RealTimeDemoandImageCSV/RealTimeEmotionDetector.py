@@ -1,7 +1,8 @@
 import cv2
 import torch
 from PIL import Image
-from models.utils.visualization import visualize_gradients
+#from models.utils.visualization import visualize_gradients
+from models.utils.attention_map import GradCAMHandler
 
 
 
@@ -16,6 +17,10 @@ class RealTimeEmotionDetector:
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = self.model.to(self.device)
         self.model.eval()
+
+        self.gradcam_handler = None
+        if cfg.model == "hybrid": #self.mode == "realtime_attention_map" and 
+            self.gradcam_handler = GradCAMHandler(self.model, device=self.device)
 
     def detect_emotion(self):
         face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -58,22 +63,20 @@ class RealTimeEmotionDetector:
                     cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
                 
-                elif self.mode == "realtime_gradient":
+                elif self.mode == "realtime_attention_map" and self.cfg.model == "hybrid":
 
                     cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
                     cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
 
-                    # Gradient visualization
-                    gradient_map = visualize_gradients(self.model, face_tensor, torch.tensor([0]), self.cfg)
-                    grad_overlay = gradient_map[0].transpose(1, 2, 0)  
-                    grad_overlay = cv2.cvtColor(grad_overlay, cv2.COLOR_RGB2BGR)
+                    # Grad-CAM visualization
+                    heatmap_colored = self.gradcam_handler.compute_gradcam(face_tensor, target_class=torch.argmax(prediction))
+                    heatmap_colored = cv2.resize(heatmap_colored, (w, h))
 
-                    grad_overlay = cv2.convertScaleAbs(grad_overlay, alpha=1.5, beta=100) #alpha=contrast beta=brightness
-
-                    grad_overlay = cv2.resize(grad_overlay, (w, h))
+                    # Overlay Grad-CAM on face
+                    frame[y:y+h, x:x+w] = cv2.addWeighted(frame[y:y+h, x:x+w], 0.6, heatmap_colored, 0.4, 0)
 
                     
-                    frame[y:y+h, x:x+w] = cv2.addWeighted(frame[y:y+h, x:x+w], 0.6, grad_overlay, 0.4, 0)
+                    #frame[y:y+h, x:x+w] = cv2.addWeighted(frame[y:y+h, x:x+w], 0.6, heatmap_colored, 0.4, 0)
 
             
             if probabilities is not None:
@@ -86,13 +89,19 @@ class RealTimeEmotionDetector:
                                 (start_x, start_y + i * 20), 
                                 cv2.FONT_HERSHEY_SIMPLEX,
                                 0.5,
-                                (255, 0, 255),  #Text displayu color
+                                (255, 255, 255),  #Text displayu color
                                 1
                             )      
             
             cv2.imshow('Real-Time Emotion Detection', frame)
-            if cv2.waitKey(1) & 0xFF == 27:  #Exit on pressing exc key
+
+            # Handle keypress for toggling modes
+            key = cv2.waitKey(1) & 0xFF
+            if key == 27:  # Exit on pressing ESC key
                 break
+            elif key == ord('t') or key == ord('T'):  # Press T to toggling between modes
+                self.mode = "realtime_attention_map" if self.mode == "realtime_detection" else "realtime_detection"
+                print(f"Switched to mode: {self.mode}")
 
         cap.release()
         cv2.destroyAllWindows()

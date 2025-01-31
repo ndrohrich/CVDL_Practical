@@ -23,7 +23,7 @@ def main(cfg):
         # Image processing mode
         process_images(cfg)
 
-    elif cfg.mode in ["realtime_detection", "realtime_gradient"]:
+    elif cfg.mode in ["realtime_detection", "realtime_attention_map"]:
         realtime_emotion_detection(cfg)
         
     else:

@@ -96,6 +96,8 @@ class Trainer():
 
         os.makedirs(log_dir)
         os.makedirs(model_dir)
+        os.makedirs(checkpoint_dir)
+
 
         self.model_dir = model_dir
         self.checkpoint_dir = checkpoint_dir 

@@ -53,6 +53,8 @@ class AffectNetDataset(Dataset):
                 one_hot_encoding[4] = 1
             case 2: 
                 one_hot_encoding[5] = 1
+            case 6:
+                one_hot_encoding[6] = 1
             case 7: # contempt -> Counted as Disgust 
                 one_hot_encoding[4] = 1
             case _:

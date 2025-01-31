@@ -115,8 +115,15 @@ class Trainer():
                 self._save_checkpoint(epoch)
         self._save_model()
 
-    def _save_checkpoint(self,epoch): 
-        torch.save(self.model, os.path.join(self.checkpoint_dir, f'model_{epoch}_epochs.pth'))
+    def _save_checkpoint(self,epoch):
+
+        # Ensure the checkpoint directory exists
+        if not os.path.exists(self.checkpoint_dir):
+            os.makedirs(self.checkpoint_dir, exist_ok=True)
+
+
+        checkpoint_path = os.path.join(self.checkpoint_dir, f'model_{epoch}_epochs.pth')
+        torch.save(self.model, checkpoint_path)
         print(f'SAVED CHECKPOINT TO DIR: {self.checkpoint_dir}')
 
     def _save_model(self): 

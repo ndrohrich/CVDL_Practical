@@ -41,17 +41,17 @@ class AffectNetDataset(Dataset):
     def _label_to_onehot(self, label_string): 
         one_hot_encoding = torch.zeros((6))
         match label_string: 
-            case 4: 
+            case 3: 
                 one_hot_encoding[0] = 1
-            case 7: 
+            case 5: 
                 one_hot_encoding[1] = 1
-            case 6: 
+            case 4: 
                 one_hot_encoding[2] = 1
             case 0: 
                 one_hot_encoding[3] = 1
-            case 2: 
+            case 1: 
                 one_hot_encoding[4] = 1
-            case 3: 
+            case 2: 
                 one_hot_encoding[5] = 1
             case 1: # contempt -> Counted as Disgust 
                 one_hot_encoding[4] = 1

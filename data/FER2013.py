@@ -30,7 +30,7 @@ class FER2013(Dataset):
         __getitem__(idx): Returns the image and label at the specified index.
     """
     
-    def __init__(self,transform=None,split='train',cache=True):
+    def __init__(self,transform=None,split='train',cache=False):
         super().__init__()
         if not split in ['train','test']:
             raise ValueError("Invalid split, choose from 'train' or 'test'")
@@ -60,6 +60,8 @@ class FER2013(Dataset):
         # if split=='test':
         #     cache=False
         self.cache=cache
+
+        # Removed Cache 
         if cache:
             self.datas=[]
             self.labels=[]

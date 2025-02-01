@@ -75,8 +75,8 @@ class Trainer():
         dataset_train = dataset['train']
         dataset_test = dataset['test']
 
-        self.dataloader_train = DataLoader(dataset=dataset_train, batch_size=self.args.batch_size, shuffle=True, num_workers=self.args.num_workers)
-        self.dataloader_test = DataLoader(dataset=dataset_test, batch_size=self.args.batch_size, shuffle=False, num_workers=self.args.num_workers)
+        self.dataloader_train = DataLoader(dataset=dataset_train, batch_size=self.args.batch_size, shuffle=True, num_workers=self.args.num_workers, pin_memory=True)
+        self.dataloader_test = DataLoader(dataset=dataset_test, batch_size=self.args.batch_size, shuffle=False, num_workers=self.args.num_workers, pin_memory=True)
         
         print(f"image size: {next(iter(self.dataloader_train))[0].shape}")
 

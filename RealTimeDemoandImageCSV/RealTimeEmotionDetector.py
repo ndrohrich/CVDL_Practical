@@ -1,7 +1,6 @@
 import cv2
 import torch
 from PIL import Image
-#from models.utils.visualization import visualize_gradients
 from models.utils.attention_map import GradCAMHandler
 
 
@@ -19,7 +18,7 @@ class RealTimeEmotionDetector:
         self.model.eval()
 
         self.gradcam_handler = None
-        if cfg.model == "hybrid": #self.mode == "realtime_attention_map" and 
+        if cfg.model == "hybrid": 
             self.gradcam_handler = GradCAMHandler(self.model, device=self.device)
 
     def detect_emotion(self):
@@ -47,7 +46,9 @@ class RealTimeEmotionDetector:
 
             probabilities = None #reset for each frame
 
-            for (x, y, w, h) in face_rects:
+            start_x, start_y = 10, 30
+
+            for face_idx, (x, y, w, h) in enumerate(face_rects):
                 face = frame[y:y+h, x:x+w]
                 face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
                 face_pil = Image.fromarray(face).convert("L")
@@ -84,18 +85,16 @@ class RealTimeEmotionDetector:
                     # Overlay Grad-CAM on face
                     frame[y:y+h, x:x+w] = cv2.addWeighted(frame[y:y+h, x:x+w], 0.6, heatmap_colored, 0.4, 0)
 
-                    
-                    #frame[y:y+h, x:x+w] = cv2.addWeighted(frame[y:y+h, x:x+w], 0.6, heatmap_colored, 0.4, 0)
 
             
             if probabilities is not None:
-                        start_x, start_y = 10, 30  
+                        current_y = start_y + face_idx * (20 * (len(self.emotion_labels) + 2))
                         for i, (emotion, prob) in enumerate(zip(self.emotion_labels, probabilities)):
                             text = f"{emotion}: {prob:.2f}"
                             cv2.putText(
                                 frame,
                                 text,
-                                (start_x, start_y + i * 20), 
+                                (start_x, current_y + i * 20), 
                                 cv2.FONT_HERSHEY_SIMPLEX,
                                 0.5,
                                 (255, 255, 255),  #Text displayu color
@@ -104,7 +103,7 @@ class RealTimeEmotionDetector:
                             cv2.putText(
                                 frame,
                                 f"{neutral_label}: {1 - max_prob:.2f}",  # Confidence for neutral
-                                (start_x, start_y + len(self.emotion_labels) * 20),
+                                (start_x, current_y + len(self.emotion_labels) * 20),
                                 cv2.FONT_HERSHEY_SIMPLEX,
                                 0.5,
                                 (255, 255, 255),  # Text display color

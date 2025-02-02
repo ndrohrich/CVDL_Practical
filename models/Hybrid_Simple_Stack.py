@@ -77,7 +77,7 @@ class Hybrid(nn.Module):
             cam = F.relu(cam) '''
 
         self.logits = output
-        return F.softmax(output, dim=1)
+        return output
 
 # CNN Encoder returns outputs of shape [batch, 256, 16, 16] given [batch, 1, 64, 64] input images
 class CNN_encoder(nn.Module): 

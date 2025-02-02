@@ -15,10 +15,19 @@ def init_transforms(cfg):
     cfg: OmegaConf
         Hyperparameters parsed via command-line using hydra.
     '''
-    
-    train_transforms = tf.Compose([tf.Resize((64,64)),
+    if cfg.augments:
+        train_transforms = tf.Compose([tf.Resize((64,64)),
                                    tf.Grayscale(),
-                                   tf.ToTensor()])
+                                   tf.RandomHorizontalFlip(p=cfg.probability),
+                                   tf.ColorJitter(brightness=np.random.uniform(cfg.brightness[0], cfg.brightness[1]), contrast=np.random.uniform(cfg.contrast[0], cfg.contrast[1])),
+                                   tf.ToTensor(),
+                                   tf.RandomErasing(cfg.probability*0.5, scale=(cfg.min_area, cfg.max_area), ratio=(cfg.min_aspect_ratio, cfg.max_aspect_ratio)),
+                                   tf.Lambda(lambda x: random_half_black(x,cfg.probability*0.5))])
+    else:
+        train_transforms = tf.Compose([tf.Resize((64,64)),
+                                    tf.Grayscale(),
+                                    tf.ToTensor()])
+    
     test_transforms = tf.Compose([tf.Resize((64,64)),
                                   tf.Grayscale(),
                                   tf.ToTensor()])

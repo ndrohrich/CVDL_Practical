@@ -112,8 +112,11 @@ class RealTimeEmotionDetector:
             
                 
 
-
+            
+            cv2.namedWindow('Real-Time Emotion Detection', cv2.WINDOW_NORMAL)
+            cv2.resizeWindow('Real-Time Emotion Detection', 1280, 720)
             cv2.imshow('Real-Time Emotion Detection', frame)
+
 
             # Handle keypress for toggling modes
             key = cv2.waitKey(1) & 0xFF

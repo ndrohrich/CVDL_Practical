@@ -11,9 +11,9 @@ dataset_mode : fer #can be either all, ck_plus or affectnet
 load_model: false
 
 # ViT specifics
-patch_size: 8ck_plus
+patch_size: 4
 depth: 2
-embed_dim: 256
+embed_dim: 64
 num_heads: 4
 
 # Training 

@@ -52,7 +52,7 @@ class RealTimeEmotionDetector:
 
 
                 with torch.no_grad():
-                        prediction = self.model(face_tensor)
+                        prediction = self.model(face_tensor, apply_softmax = True)
                         probabilities = prediction.cpu().numpy().flatten()
                         label = self.emotion_labels[prediction.argmax().item()]
 

@@ -27,7 +27,7 @@ class ImageCSVProcessor:
                     img_tensor = self.transform(img).unsqueeze(0).to(self.device)
 
                     with torch.no_grad():
-                        prediction = self.model(img_tensor)
+                        prediction = self.model(img_tensor, apply_softmax = True)
                         prob = prediction.cpu().numpy().flatten()
                         label = self.emotion_labels[prediction.argmax().item()]
                         predictions.append([img_file, *prob, label])

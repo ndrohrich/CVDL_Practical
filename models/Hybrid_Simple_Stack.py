@@ -38,7 +38,7 @@ class Hybrid(nn.Module):
     def backward_hook (self, module, grad_input, grad_output): 
         self.gradients = grad_output[0]
 
-    def forward(self, x):
+    def forward(self, x, apply_softmax=False):
         # Forward through CNN encoder 
         features = self.cnn_encoder(x)
 
@@ -77,7 +77,11 @@ class Hybrid(nn.Module):
             cam = F.relu(cam) '''
 
         self.logits = output
-        return F.softmax(output, dim=1)
+
+        if apply_softmax:
+            output = F.softmax(output, dim=1)
+            
+        return output
 
 # CNN Encoder returns outputs of shape [batch, 256, 16, 16] given [batch, 1, 64, 64] input images
 class CNN_encoder(nn.Module): 

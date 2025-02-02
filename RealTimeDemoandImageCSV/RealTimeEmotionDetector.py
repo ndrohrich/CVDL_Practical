@@ -33,6 +33,9 @@ class RealTimeEmotionDetector:
         if not cap.isOpened():
             print("Error: Unable to access the video source/ Webcam.")
             return
+        
+        threshold = 0.45 #tested various values this seems to be workig fine.
+        neutral_label = "neutral"
 
         while cap.isOpened():
             ret, frame = cap.read()
@@ -54,7 +57,13 @@ class RealTimeEmotionDetector:
                 with torch.no_grad():
                         prediction = self.model(face_tensor, apply_softmax = True)
                         probabilities = prediction.cpu().numpy().flatten()
-                        label = self.emotion_labels[prediction.argmax().item()]
+                        max_prob = probabilities.max()
+                        max_index = probabilities.argmax()
+
+                        if max_prob >= threshold:
+                            label = self.emotion_labels[max_index]
+                        else:
+                             label = neutral_label
 
 
                 if self.mode == "realtime_detection":
@@ -92,7 +101,19 @@ class RealTimeEmotionDetector:
                                 (255, 255, 255),  #Text displayu color
                                 1
                             )      
+                            cv2.putText(
+                                frame,
+                                f"{neutral_label}: {1 - max_prob:.2f}",  # Confidence for neutral
+                                (start_x, start_y + len(self.emotion_labels) * 20),
+                                cv2.FONT_HERSHEY_SIMPLEX,
+                                0.5,
+                                (255, 255, 255),  # Text display color
+                                1
+                            )
             
+                
+
+
             cv2.imshow('Real-Time Emotion Detection', frame)
 
             # Handle keypress for toggling modes

@@ -7,7 +7,7 @@ num_channels: 1
 # Model 
 model: hybrid    # cnn, vit, fcn or hybrid
 pretrain: False 
-dataset_mode : fer #can be either all, ck_plus or affectnet 
+dataset_mode : all #can be either all, ck_plus or affectnet 
 load_model: false
 
 # ViT specifics

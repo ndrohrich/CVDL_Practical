@@ -4,8 +4,6 @@ from PIL import Image
 from models.utils.attention_map import GradCAMHandler
 
 
-
-
 class RealTimeEmotionDetector:
     def __init__(self, model, transform, emotion_labels,mode="realtime_detection", cfg=None):   
         self.model = model
@@ -18,7 +16,7 @@ class RealTimeEmotionDetector:
         self.model.eval()
 
         self.gradcam_handler = None
-        if cfg.model == "hybrid": 
+        if cfg.model == "hybrid":  #as our final model is Hybrid we implemented it only for hybrid
             self.gradcam_handler = GradCAMHandler(self.model, device=self.device)
 
     def detect_emotion(self):
@@ -36,6 +34,11 @@ class RealTimeEmotionDetector:
         threshold = 0.45 #tested various values this seems to be workig fine.
         neutral_label = "neutral"
 
+        frame_count = 0
+        process_interval = 15 #process every n frames, n is values we give here.
+        start_time = cv2.getTickCount()
+        last_processed_frame = None
+
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
@@ -44,78 +47,97 @@ class RealTimeEmotionDetector:
             gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
             face_rects = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(40, 40))
 
-            probabilities = None #reset for each frame
+            if frame_count % process_interval == 0:
+                probabilities = None #reset for each frame
 
-            start_x, start_y = 10, 30
+                start_x, start_y = 10, 30
 
-            for face_idx, (x, y, w, h) in enumerate(face_rects):
-                face = frame[y:y+h, x:x+w]
-                face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
-                face_pil = Image.fromarray(face).convert("L")
-                face_tensor = self.transform(face_pil).unsqueeze(0).to(self.device)
-
-
-                with torch.no_grad():
-                        prediction = self.model(face_tensor, apply_softmax = True)
-                        probabilities = prediction.cpu().numpy().flatten()
-                        max_prob = probabilities.max()
-                        max_index = probabilities.argmax()
-
-                        if max_prob >= threshold:
-                            label = self.emotion_labels[max_index]
-                        else:
-                             label = neutral_label
+                for face_idx, (x, y, w, h) in enumerate(face_rects):
+                    face = frame[y:y+h, x:x+w]
+                    face = cv2.cvtColor(face, cv2.COLOR_BGR2RGB)
+                    face_pil = Image.fromarray(face).convert("L")
+                    face_tensor = self.transform(face_pil).unsqueeze(0).to(self.device)
 
 
-                if self.mode == "realtime_detection":
+                    with torch.no_grad():
+                            prediction = self.model(face_tensor, apply_softmax = True)
+                            probabilities = prediction.cpu().numpy().flatten()
+                            max_prob = probabilities.max()
+                            max_index = probabilities.argmax()
+
+                            if max_prob >= threshold:
+                                label = self.emotion_labels[max_index]
+                            else:
+                                label = neutral_label
+
+                    #We can start any mode, as they are switchable using T during Runtime
+                    if self.mode == "realtime_detection":
+                        
+                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
                     
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                    cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                    elif self.mode == "realtime_attention_map" and self.cfg.model == "hybrid":
+
+                        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+
+                        # Grad-CAM visualization
+                        heatmap_colored = self.gradcam_handler.compute_gradcam(face_tensor, target_class=torch.argmax(prediction))
+                        heatmap_colored = cv2.resize(heatmap_colored, (w, h))
+
+                        # Overlay Grad-CAM on face
+                        frame[y:y+h, x:x+w] = cv2.addWeighted(frame[y:y+h, x:x+w], 0.6, heatmap_colored, 0.4, 0)
+
 
                 
-                elif self.mode == "realtime_attention_map" and self.cfg.model == "hybrid":
-
-                    cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                    cv2.putText(frame, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-
-                    # Grad-CAM visualization
-                    heatmap_colored = self.gradcam_handler.compute_gradcam(face_tensor, target_class=torch.argmax(prediction))
-                    heatmap_colored = cv2.resize(heatmap_colored, (w, h))
-
-                    # Overlay Grad-CAM on face
-                    frame[y:y+h, x:x+w] = cv2.addWeighted(frame[y:y+h, x:x+w], 0.6, heatmap_colored, 0.4, 0)
-
-
-            
-            if probabilities is not None:
-                        current_y = start_y + face_idx * (20 * (len(self.emotion_labels) + 2))
-                        for i, (emotion, prob) in enumerate(zip(self.emotion_labels, probabilities)):
-                            text = f"{emotion}: {prob:.2f}"
-                            cv2.putText(
-                                frame,
-                                text,
-                                (start_x, current_y + i * 20), 
-                                cv2.FONT_HERSHEY_SIMPLEX,
-                                0.5,
-                                (255, 255, 255),  #Text displayu color
-                                1
-                            )      
-                            cv2.putText(
-                                frame,
-                                f"{neutral_label}: {1 - max_prob:.2f}",  # Confidence for neutral
-                                (start_x, current_y + len(self.emotion_labels) * 20),
-                                cv2.FONT_HERSHEY_SIMPLEX,
-                                0.5,
-                                (255, 255, 255),  # Text display color
-                                1
-                            )
-            
+                if probabilities is not None:
+                            current_y = start_y + face_idx * (20 * (len(self.emotion_labels) + 2))
+                            for i, (emotion, prob) in enumerate(zip(self.emotion_labels, probabilities)):
+                                text = f"{emotion}: {prob:.2f}"
+                                cv2.putText(
+                                    frame,
+                                    text,
+                                    (start_x, current_y + i * 20), 
+                                    cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.5,
+                                    (255, 255, 255),  #Text displayu color
+                                    1
+                                )      
+                                cv2.putText(
+                                    frame,
+                                    f"{neutral_label}: {1 - max_prob:.2f}",  # Confidence for neutral
+                                    (start_x, current_y + len(self.emotion_labels) * 20),
+                                    cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.5,
+                                    (255, 255, 255),  # Text display color
+                                    1
+                                )
                 
+                last_processed_frame = frame.copy()
+
+            display_frame = last_processed_frame if last_processed_frame is not None else frame
 
             
-            cv2.namedWindow('Real-Time Emotion Detection', cv2.WINDOW_NORMAL)
-            cv2.resizeWindow('Real-Time Emotion Detection', 1280, 720)
-            cv2.imshow('Real-Time Emotion Detection', frame)
+            frame_count += 1
+            
+            fps = cv2.getTickFrequency() / (cv2.getTickCount() - start_time)
+            start_time = cv2.getTickCount()  # Reset start time
+            
+            height, width, _ = display_frame.shape
+            bottom_left_x = 10
+            bottom_left_y = height - 20
+
+            cv2.putText(display_frame, f"Processing every {process_interval} frames and actual FPS: {fps:.2f} Frames",
+                        (bottom_left_x, bottom_left_y),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.6,
+                        (0, 255, 0), 1)
+        
+            
+            #cv2.namedWindow('Real-Time Emotion Detection', cv2.WINDOW_NORMAL)
+            #cv2.resizeWindow('Real-Time Emotion Detection', 800, 800)
+            cv2.imshow('Real-Time Emotion Detection', display_frame)
 
 
             # Handle keypress for toggling modes

@@ -23,9 +23,20 @@ class Hybrid(nn.Module):
             case 'vgg':
                 self.cnn_encoder = VGG_encoder(input_channels=1)
         self.attention_module = nn.Sequential(*[TransformerBlock(dim=embed_dim, num_heads=num_heads) for _ in range(int(depth))])
-        self.mlp_head = nn.Sequential(nn.Linear(in_features=embed_dim, out_features=embed_dim), 
+
+        if encoder == 'standard':
+            self.mlp_head = nn.Sequential(nn.Linear(in_features=embed_dim, out_features=embed_dim), 
                                       nn.ReLU(), 
                                       nn.Linear(in_features=embed_dim, out_features=num_classes))
+        else: 
+            self.mlp_head = nn.Sequential(
+                nn.Dropout(0.5),
+                nn.Linear(embed_dim, 2048),
+                nn.ReLU(),
+                nn.Dropout(0.5),
+                nn.Linear(2048, 2048),
+                nn.ReLU(),
+                nn.Linear(2048, num_classes))
         self.cls_token = nn.Parameter(data=torch.randn(1, 1, embed_dim))
         self.projection_layer = nn.Linear(in_features=64, out_features=embed_dim)
         self.demo = False  
@@ -188,7 +199,6 @@ class VGG_encoder(nn.Module):
             nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(512),
             nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.layer11 = nn.Sequential(
             nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),

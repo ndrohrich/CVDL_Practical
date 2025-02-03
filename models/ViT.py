@@ -87,6 +87,5 @@ class VisionTransformer(nn.Module):
 
         # Apply Classification Head 
         logits = self.mlp_head(cls_tokens)
-        outputs = self.softmax(logits)
 
-        return outputs
+        return logits

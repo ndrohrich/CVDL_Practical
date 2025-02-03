@@ -29,5 +29,4 @@ class TorchVisionResNet(nn.Module):
 
     def forward(self, x):
         logits = self.model(x)
-        probabilities = F.softmax(logits, dim=1)
-        return probabilities
+        return logits

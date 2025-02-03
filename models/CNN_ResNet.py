@@ -54,7 +54,7 @@ class ResNet18(nn.Module):
             self.in_channels = out_channels
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x, apply_softmax = False):
         out = self.conv1(x)
         out = self.bn1(out)
         out = self.relu(out)
@@ -68,5 +68,7 @@ class ResNet18(nn.Module):
         out = self.avgpool(out)
         out = out.view(out.size(0), -1)
         out = self.fc(out)
-        out = F.softmax(out, dim=1)
+        if apply_softmax:
+            out = F.softmax(out, dim=1)
+            
         return out

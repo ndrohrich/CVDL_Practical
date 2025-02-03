@@ -94,7 +94,7 @@ class VGG(nn.Module):
 
         
 
-    def forward(self, x):
+    def forward(self, x, apply_softmax = False):
         x = self.layer1(x)
         x = self.layer2(x)
         x = self.layer3(x)
@@ -113,5 +113,8 @@ class VGG(nn.Module):
         x = self.fc(x)
         x=self.fc1(x)
         x=self.fc2(x)
+
+        if apply_softmax:
+            x=nn.functional.softmax(x, dim=1)
 
         return x

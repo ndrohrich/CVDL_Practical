@@ -27,6 +27,10 @@ class TorchVisionResNet(nn.Module):
         
         self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
 
-    def forward(self, x):
+    def forward(self, x, apply_softmax = False):
         logits = self.model(x)
+
+        if apply_softmax:
+            logits = F.softmax(logits, dim=1)
+            
         return logits

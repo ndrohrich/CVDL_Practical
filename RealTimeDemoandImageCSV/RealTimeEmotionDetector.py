@@ -31,13 +31,15 @@ class RealTimeEmotionDetector:
             print("Error: Unable to access the video source/ Webcam.")
             return
         
-        threshold = 0.45 #tested various values this seems to be workig fine.
+        threshold = 0.6 #tested various values this seems to be workig fine.
         neutral_label = "neutral"
 
         frame_count = 0
         process_interval = 15 #process every n frames, n is values we give here.
         start_time = cv2.getTickCount()
         last_processed_frame = None
+
+        display_mode = "under_head"
 
         while cap.isOpened():
             ret, frame = cap.read()
@@ -66,9 +68,9 @@ class RealTimeEmotionDetector:
                             max_index = probabilities.argmax()
 
                             if max_prob >= threshold:
-                                label = self.emotion_labels[max_index]
+                                label = f"{self.emotion_labels[max_index]} ({max_prob:.2f})"
                             else:
-                                label = neutral_label
+                                label = f"{neutral_label} ({1 - max_prob:.2f})"
 
                     #We can start any mode, as they are switchable using T during Runtime
                     if self.mode == "realtime_detection":
@@ -93,27 +95,50 @@ class RealTimeEmotionDetector:
                 
                 if probabilities is not None:
                             current_y = start_y + face_idx * (20 * (len(self.emotion_labels) + 2))
-                            for i, (emotion, prob) in enumerate(zip(self.emotion_labels, probabilities)):
-                                text = f"{emotion}: {prob:.2f}"
-                                cv2.putText(
-                                    frame,
-                                    text,
-                                    (start_x, current_y + i * 20), 
-                                    cv2.FONT_HERSHEY_SIMPLEX,
-                                    0.5,
-                                    (255, 255, 255),  #Text displayu color
-                                    1
-                                )      
-                                cv2.putText(
-                                    frame,
-                                    f"{neutral_label}: {1 - max_prob:.2f}",  # Confidence for neutral
-                                    (start_x, current_y + len(self.emotion_labels) * 20),
-                                    cv2.FONT_HERSHEY_SIMPLEX,
-                                    0.5,
-                                    (255, 255, 255),  # Text display color
-                                    1
-                                )
-                
+                            if display_mode == "under_head":
+                                for i, (emotion, prob) in enumerate(zip(self.emotion_labels, probabilities)):
+                                    text = f"{emotion}: {prob:.2f}"
+                                    cv2.putText(
+                                        frame,
+                                        text,
+                                        (x, y + h + 20 + i * 20), 
+                                        cv2.FONT_HERSHEY_SIMPLEX,
+                                        0.5,
+                                        (0, 255, 0),  #Text displayu color
+                                        1
+                                    )      
+                                    cv2.putText(
+                                        frame,
+                                        f"{neutral_label}: {1 - max_prob:.2f}",  # Confidence for neutral
+                                        (x, y + h + 20 + len(self.emotion_labels) * 20),
+                                        cv2.FONT_HERSHEY_SIMPLEX,
+                                        0.5,
+                                        (0, 255, 0),  # Text display color
+                                        1
+                                    )
+                            elif display_mode == "top_left":
+                                 for i, (emotion, prob) in enumerate(zip(self.emotion_labels, probabilities)):
+                                    text = f"{emotion}: {prob:.2f}"
+                                    cv2.putText(
+                                        frame,
+                                        text,
+                                        (start_x, current_y + i * 20), 
+                                        cv2.FONT_HERSHEY_SIMPLEX,
+                                        0.5,
+                                        (0, 255, 0),  #Text displayu color
+                                        1
+                                    )      
+                                    cv2.putText(
+                                        frame,
+                                        f"{neutral_label}: {1 - max_prob:.2f}",  # Confidence for neutral
+                                        (start_x, current_y + len(self.emotion_labels) * 20),
+                                        cv2.FONT_HERSHEY_SIMPLEX,
+                                        0.5,
+                                        (0, 255, 0),  # Text display color
+                                        1
+                                    )
+
+
                 last_processed_frame = frame.copy()
 
             display_frame = last_processed_frame if last_processed_frame is not None else frame
@@ -147,6 +172,9 @@ class RealTimeEmotionDetector:
             elif key == ord('t') or key == ord('T'):  # Press T to toggling between modes
                 self.mode = "realtime_attention_map" if self.mode == "realtime_detection" else "realtime_detection"
                 print(f"Switched to mode: {self.mode}")
+            elif key == ord('y') or key == ord('Y'):  # Press Y to toggle probabiliies display mode
+                display_mode = "top_left" if display_mode == "under_head" else "under_head"
+                print(f"Switched to probabilities display mode: {display_mode}")
 
         cap.release()
         cv2.destroyAllWindows()

@@ -48,7 +48,8 @@ def get_model(args, pretrained_encoder=None):
              input_channels=args.num_channels, 
              depth=args.depth, 
              embed_dim=args.embed_dim,
-             num_heads=args.num_heads)
+             num_heads=args.num_heads,
+             channel_multiplier=args.channel_multiplier)
     elif args.model == 'hybrid_alternating': 
         print('Using Hybrid Alternating model')
         model = Hybrid_Alternating.Hybrid(

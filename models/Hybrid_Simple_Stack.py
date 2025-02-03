@@ -11,11 +11,12 @@ class Hybrid(nn.Module):
                  input_channels=1,
                  depth=6, 
                  embed_dim=256,
-                 num_heads=3
+                 num_heads=3, 
+                 channel_multiplier=1
                  ):  
         super(Hybrid, self).__init__()
     
-        self.cnn_encoder = CNN_encoder(input_channels=input_channels)
+        self.cnn_encoder = CNN_encoder(input_channels=input_channels, channel_multiplier=channel_multiplier)
         self.attention_module = nn.Sequential(*[TransformerBlock(dim=embed_dim, num_heads=num_heads) for _ in range(int(depth))])
         self.mlp_head = nn.Sequential(nn.Linear(in_features=embed_dim, out_features=embed_dim), 
                                       nn.ReLU(), 
@@ -29,6 +30,8 @@ class Hybrid(nn.Module):
 
         # Register Backward Hook for gradient 
         self.cnn_encoder.layer8.register_backward_hook(self.backward_hook)
+
+        self.channel_multiplier = channel_multiplier
 
     # Define forward hook that gets executed for each forward pass
     def forward_hook(self, module, input, output): 
@@ -62,20 +65,6 @@ class Hybrid(nn.Module):
         # Forward through MLP
         output = self.mlp_head(cls_tokens)
 
-        '''if self.demo: 
-            # Clear out gradients 
-            self.zero_grad()
-
-            # Perform backward on most likely class logit 
-            target_class = torch.argmax(output)
-            target_class_logit = output[:, target_class]
-            target_class_logit.backward(retain_graph=True)
-
-            # Compute CAM
-            weights = self.gradients.mean(dim=(2, 3))
-            cam = torch.sum(weights[:, :, None, None] * features, dim=1) 
-            cam = F.relu(cam) '''
-
         self.logits = output
 
         if apply_softmax:
@@ -85,50 +74,53 @@ class Hybrid(nn.Module):
 
 # CNN Encoder returns outputs of shape [batch, 256, 16, 16] given [batch, 1, 64, 64] input images
 class CNN_encoder(nn.Module): 
-    def __init__(self, input_channels=1):
+    def __init__(self, input_channels=1, channel_multiplier=1):
         super().__init__()
+
+        self.channel_multiplier = channel_multiplier
+
         self.layer1 = nn.Sequential(
-                nn.Conv2d(input_channels, 8, kernel_size=3, stride=1, padding=1),
-                nn.BatchNorm2d(8),
+                nn.Conv2d(input_channels, 8*self.channel_multiplier, kernel_size=3, stride=1, padding=1),
+                nn.BatchNorm2d(8*self.channel_multiplier),
                 nn.ReLU()
             )
         self.layer2 = nn.Sequential(
-            nn.Conv2d(8, 16, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(16),
+            nn.Conv2d(8*self.channel_multiplier, 16*self.channel_multiplier, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(16*self.channel_multiplier),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
 
         self.layer3 = nn.Sequential(
-            nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(32),
+            nn.Conv2d(16*self.channel_multiplier, 32*self.channel_multiplier, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(32*self.channel_multiplier),
             nn.ReLU()
         )
         self.layer4 = nn.Sequential(
-            nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(64),
+            nn.Conv2d(32*self.channel_multiplier, 64*self.channel_multiplier, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(64*self.channel_multiplier),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.layer5 = nn.Sequential(
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(128),
+            nn.Conv2d(64*self.channel_multiplier, 128*self.channel_multiplier, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128*self.channel_multiplier),
             nn.ReLU()
         )
         self.layer6 = nn.Sequential(
-            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(128),
+            nn.Conv2d(128*self.channel_multiplier, 128*self.channel_multiplier, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128*self.channel_multiplier),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2)
         )
         self.layer7 = nn.Sequential(
-            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(256),
+            nn.Conv2d(128*self.channel_multiplier, 256*self.channel_multiplier, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256*self.channel_multiplier),
             nn.ReLU()
         )
         self.layer8 = nn.Sequential(
-            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(256),
+            nn.Conv2d(256*self.channel_multiplier, 256*self.channel_multiplier, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256*self.channel_multiplier),
             nn.ReLU()
         )
     

@@ -64,3 +64,4 @@ resnet:
   input_channels: 1
 
 channel_multiplier: 1
+hybrid_encoder: standard

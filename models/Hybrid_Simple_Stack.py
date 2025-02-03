@@ -12,11 +12,16 @@ class Hybrid(nn.Module):
                  depth=6, 
                  embed_dim=256,
                  num_heads=3, 
-                 channel_multiplier=1
+                 channel_multiplier=1, 
+                 encoder='standard'
                  ):  
         super(Hybrid, self).__init__()
-    
-        self.cnn_encoder = CNN_encoder(input_channels=input_channels, channel_multiplier=channel_multiplier)
+
+        match encoder:
+            case 'standard':
+                self.cnn_encoder = CNN_encoder(input_channels=input_channels, channel_multiplier=channel_multiplier)
+            case 'vgg':
+                self.cnn_encoder = VGG_encoder(input_channels=1)
         self.attention_module = nn.Sequential(*[TransformerBlock(dim=embed_dim, num_heads=num_heads) for _ in range(int(depth))])
         self.mlp_head = nn.Sequential(nn.Linear(in_features=embed_dim, out_features=embed_dim), 
                                       nn.ReLU(), 
@@ -128,3 +133,85 @@ class CNN_encoder(nn.Module):
         output = self.layer8(self.layer7(self.layer6(self.layer5(self.layer4(self.layer3(self.layer2(self.layer1(x))))))))
         return output 
 
+class VGG_encoder(nn.Module): 
+    def __init__(self, input_channels):
+        super().__init__()
+        self.layer1 = nn.Sequential(
+            nn.Conv2d(input_channels, 64, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU()
+        )
+        self.layer2 = nn.Sequential(
+            nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(64),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.layer3 = nn.Sequential(
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU()
+        )
+        self.layer4 = nn.Sequential(
+            nn.Conv2d(128, 128, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(128),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.layer5 = nn.Sequential(
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU()
+        )
+        self.layer6 = nn.Sequential(
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU()
+        )
+        self.layer7 = nn.Sequential(
+            nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(256),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.layer8 = nn.Sequential(
+            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU()
+        )
+        self.layer9 = nn.Sequential(
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU()
+        )
+        self.layer10 = nn.Sequential(
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
+        self.layer11 = nn.Sequential(
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU()
+        )
+        self.layer12 = nn.Sequential(
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(512),
+            nn.ReLU()
+        )
+    def forward(self, x):
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.layer5(x)
+        x = self.layer6(x)
+        x = self.layer7(x)
+        x = self.layer8(x)
+        x = self.layer9(x)
+        x = self.layer10(x)
+        x = self.layer11(x)
+        x = self.layer12(x)
+
+        return x

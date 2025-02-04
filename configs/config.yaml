@@ -18,11 +18,11 @@ num_heads: 1
 
 # Training 
 num_classes: 6
-batch_size: 16
+batch_size: 128
 cuda: True 
 device: cuda
-num_workers: 4
-epochs: 10
+num_workers: 16
+epochs: 100
 lr: .0001
 
 # FCN specifics
@@ -64,4 +64,4 @@ resnet:
   input_channels: 1
 
 channel_multiplier: 1
-hybrid_encoder: standard
+hybrid_encoder: standard #standard, vgg

@@ -63,10 +63,7 @@ class Trainer():
         logging.basicConfig(level=logging.INFO)
         
     def _init_transforms(self): 
-        if self.args.augments: 
-            transforms = augmentations.random_Erasing_flip_Brightness_Contrast_transforms(self.args)
-        else:
-            transforms = augmentations.init_transforms(self.args)
+        transforms = augmentations.init_transforms(self.args)
         self.train_transforms = transforms['train']
         self.test_transforms = transforms['test']
 

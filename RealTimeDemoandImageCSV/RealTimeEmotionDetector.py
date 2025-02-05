@@ -25,7 +25,9 @@ class RealTimeEmotionDetector:
         if face_cascade.empty():
             raise ValueError("Error loading Haar cascade file.")
 
-        cap = cv2.VideoCapture(0) #webcam
+        camera_index = 0
+        max_cameras = 2 #here we might use 2 cams webcam and external cam.
+        cap = cv2.VideoCapture(camera_index) 
 
         if not cap.isOpened():
             print("Error: Unable to access the video source/ Webcam.")
@@ -153,12 +155,16 @@ class RealTimeEmotionDetector:
             bottom_left_x = 10
             bottom_left_y = height - 20
 
-            cv2.putText(display_frame, f"Processing every {process_interval} frames and actual FPS: {fps:.2f} Frames",
-                        (bottom_left_x, bottom_left_y),
+            cv2.putText(display_frame, f"Processing every {process_interval} frames.",
+                        (bottom_left_x, bottom_left_y -30),
                         cv2.FONT_HERSHEY_SIMPLEX,
-                        0.6,
+                        0.4,
                         (0, 255, 0), 1)
-        
+            cv2.putText(display_frame, "T = Normal/GradCAM View, Y = change Probabilities position, C = Switch Cameras (if any)",
+                        (bottom_left_x, bottom_left_y - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.4,
+                        (0, 255, 0), 1)
             
             #cv2.namedWindow('Real-Time Emotion Detection', cv2.WINDOW_NORMAL)
             #cv2.resizeWindow('Real-Time Emotion Detection', 800, 800)
@@ -175,6 +181,14 @@ class RealTimeEmotionDetector:
             elif key == ord('y') or key == ord('Y'):  # Press Y to toggle probabiliies display mode
                 display_mode = "top_left" if display_mode == "under_head" else "under_head"
                 print(f"Switched to probabilities display mode: {display_mode}")
+            elif key == ord('c') or key == ord('C'): #Press C to switch cameras
+                 cap.release()
+                 camera_index = (camera_index + 1) % max_cameras
+                 cap = cv2.VideoCapture(camera_index)
+                 if not cap.isOpened():
+                      print(f"Error accesing the camera {camera_index}. Switching to Default camera 0")
+                      camera_index = 0
+                      cap = cv2.VideoCapture(camera_index)
 
         cap.release()
         cv2.destroyAllWindows()

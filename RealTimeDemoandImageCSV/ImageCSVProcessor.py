@@ -13,6 +13,8 @@ class ImageCSVProcessor:
         self.model = model
         self.transform = transform
         self.emotion_labels = emotion_labels
+        self.neutral_label = "neutral"
+        self.threshold= 0.75 #this seems to be working for images
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = self.model.to(self.device)
         self.model.eval()
@@ -29,12 +31,19 @@ class ImageCSVProcessor:
                     with torch.no_grad():
                         prediction = self.model(img_tensor, apply_softmax = True)
                         prob = prediction.cpu().numpy().flatten()
-                        label = self.emotion_labels[prediction.argmax().item()]
-                        predictions.append([img_file, *prob, label])
+                        max_prob = prob.max()
+                        max_index = prediction.argmax().item()
+
+                        if max_prob >= self.threshold:
+                            label = self.emotion_labels[max_index]
+                        else:
+                            label = self.neutral_label
+
+                        predictions.append([img_file, *prob, max_prob, label])
                 except UnidentifiedImageError:
                     print(f"Skipping non-image file: {img_file}")
                 continue
 
-        df = pd.DataFrame(predictions, columns=['File', *self.emotion_labels, 'Predicted'])
+        df = pd.DataFrame(predictions, columns=['File', *self.emotion_labels, 'Max Probability', 'Predicted Emotion (Threshold)'])
         df.to_csv(output_csv, index=False)
         print(f"Predictions saved to {output_csv}")

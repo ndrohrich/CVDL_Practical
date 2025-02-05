@@ -76,7 +76,7 @@ def process_images(cfg):
     model_path = get_model_path(cfg)
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model not found at {model_path}. Train the model first!")
-    model = torch.load(model_path, map_location=cfg.device)
+    model = torch.load(model_path, map_location=cfg.device, weights_only=False)
     model.eval()
 
     # Emotion labels for predictions
@@ -100,7 +100,7 @@ def realtime_emotion_detection(cfg):
     model_path = get_model_path(cfg)
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"Model not found at {model_path}. Train the model first!")
-    model = torch.load(model_path, map_location=cfg.device)
+    model = torch.load(model_path, map_location=cfg.device, weights_only=False)
     model.eval()
 
     # Emotion labels for predictions

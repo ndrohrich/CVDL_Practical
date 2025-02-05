@@ -42,10 +42,16 @@ class Hybrid(nn.Module):
         self.demo = False  
 
         # Register Forward Hook for feature map given by last transformer block
-        self.cnn_encoder.layer8.register_forward_hook(self.forward_hook)
+        self.cnn_encoder.layer6.register_forward_hook(self.forward_hook)
 
         # Register Backward Hook for gradient 
-        self.cnn_encoder.layer8.register_backward_hook(self.backward_hook)
+        self.cnn_encoder.layer6.register_backward_hook(self.backward_hook)
+
+        if encoder == 'vgg':
+            # Register Forward Hook for feature map given by last transformer block
+            self.cnn_encoder.layer12.register_forward_hook(self.forward_hook12)
+            # Register Backward Hook for gradient 
+            self.cnn_encoder.layer12.register_backward_hook(self.backward_hook12)
 
         self.channel_multiplier = channel_multiplier
 
@@ -56,6 +62,14 @@ class Hybrid(nn.Module):
     # Define backward hook that gets executed for each backward pass
     def backward_hook (self, module, grad_input, grad_output): 
         self.gradients = grad_output[0]
+
+    # Define forward hook that gets executed for each forward pass
+    def forward_hook12(self, module, input, output): 
+        self.features12 = output
+
+    # Define backward hook that gets executed for each backward pass
+    def backward_hook12(self, module, grad_input, grad_output): 
+        self.gradients12 = grad_output[0]
 
     def forward(self, x, apply_softmax=False):
         # Forward through CNN encoder 

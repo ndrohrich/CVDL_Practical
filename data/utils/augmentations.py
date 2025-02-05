@@ -16,6 +16,7 @@ def init_transforms(cfg):
         Hyperparameters parsed via command-line using hydra.
     '''
     if cfg.augments:
+        print('USING COMBINED TRANSFORMS INCLUDING HALF MASKING!')
         train_transforms = tf.Compose([tf.Resize((64,64)),
                                    tf.Grayscale(),
                                    tf.RandomHorizontalFlip(p=cfg.probability),

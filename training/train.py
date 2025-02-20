@@ -15,7 +15,9 @@ from models.utils import discriminativ_loss
 
 from models.FCN import FeatureExtractor
 from models.utils.visualization import visualize_gradients
-
+from sklearn.metrics import confusion_matrix,ConfusionMatrixDisplay
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 
@@ -113,6 +115,41 @@ class Trainer():
             if epoch % 10 == 0:
                 self._save_checkpoint(epoch)
         self._save_model()
+
+    def load_checkpoint(self,checkpoint_pth):
+        self.model = torch.load(checkpoint_pth)
+
+    def test(self): 
+        all_preds = []
+        all_targets = []
+        with tqdm(self.dataloader_test) as iterator: 
+            for images, targets in iterator: 
+                images, targets = images.to(self.device), targets.to(self.device)
+                outputs = self.model(images)
+                cls_pred = outputs.argmax(dim=-1).cpu().numpy()  
+                target_cls = targets.argmax(dim=-1).cpu().numpy()  
+                
+                all_preds.extend(cls_pred)
+                all_targets.extend(target_cls)
+
+        all_preds = np.array(all_preds)
+        all_targets = np.array(all_targets)
+        label_names = ['happy', 'surprise', 'sadness', 'anger', 'disgust', 'fear']
+
+        cm = confusion_matrix(all_targets, all_preds, labels=np.arange(6)) 
+
+        cm_normalized = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm_normalized, display_labels=label_names)
+        fig, ax = plt.subplots()
+        disp.plot(cmap=plt.cm.Blues, ax=ax)
+        for i in range(cm.shape[0]):
+            for j in range(cm.shape[1]):
+                ax.text(j, i, f'\n \n #{cm[i, j]}', 
+                        ha='center', va='center', color='black')
+
+        plt.title('Confusion Matrix Hybrid Model')
+        plt.savefig('outputs/confusion_matrix2.png')
+        
 
     def _save_checkpoint(self,epoch):
 

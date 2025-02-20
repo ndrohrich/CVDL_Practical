@@ -48,6 +48,11 @@ output_csv: emotion_predictions.csv
 custom_model_path: ""
 
 
+#Video Processing
+input_video_path: ""
+output_video_path: "output.mp4"
+
+
 # visualization
 blur_size: 7
 

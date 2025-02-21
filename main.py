@@ -3,6 +3,7 @@ from training import train
 from torchvision import transforms
 from RealTimeDemoandImageCSV.ImageCSVProcessor import ImageCSVProcessor
 from RealTimeDemoandImageCSV.RealTimeEmotionDetector import RealTimeEmotionDetector
+from RealTimeDemoandImageCSV.ProcessVideo import EmotionVideoProcessor
 import os
 import torch
 
@@ -25,6 +26,9 @@ def main(cfg):
 
     elif cfg.mode in ["realtime_detection", "realtime_attention_map"]:
         realtime_emotion_detection(cfg)
+    
+    elif cfg.mode == "process_video":
+        process_video(cfg)
     
     elif cfg.mode == 'test':
         trainer = train.Trainer(cfg)
@@ -95,6 +99,32 @@ def process_images(cfg):
     # Process the folder and save predictions to CSV
     processor.process_folder(cfg.image_folder, output_csv=cfg.output_csv)
     
+
+def process_video(cfg):
+    transform = transforms.Compose([
+        transforms.Resize((64, 64)),
+        transforms.ToTensor(),
+    ])
+
+    
+    model_path = get_model_path(cfg)
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Model not found at {model_path}. Train the model first!")
+    model = torch.load(model_path, map_location=cfg.device, weights_only=False)
+    model.eval()
+
+    
+    emotion_labels = ['happy', 'surprise', 'sadness', 'anger', 'disgust', 'fear']
+
+   
+    processor = EmotionVideoProcessor(model, transform, emotion_labels, cfg)
+
+    
+    input_video_path = cfg.input_video_path
+    output_video_path = cfg.output_video_path
+
+   
+    processor.process_video(input_video_path, output_video_path)
 
 def realtime_emotion_detection(cfg):
     

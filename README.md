@@ -5,6 +5,28 @@ Group Project of the Winter 2024 Computer Vision and Deep Learning Practical at 
 **SWAN Group Members:**
 Sairam Yadla, Wu Yuanluo, Zharfan Nugroho, and Nikolai Röhrich
 
+
+# DATASET
+we are using several datasets for this project, the dataset is:
+- CK+ (Cohn-Kanade Extended) dataset   
+- FER2013 dataset
+- Affectnet
+    
+
+# MODELS
+We have implemented several models for this project, the models are:
+- CNNs (LeNet, ResNet, VGG)
+- ViT
+- Hybrid (CNN + ViT)
+- FCN (Feature Clustering Network)
+
+# Repository Overview 
+
+- Datasets and corresponding util files are saved in `data`.
+- Models, with CNN, ViT, and hybrid architectures, as well as underlying Modules such as Transformer Blocks, are located in `models`.
+- The base training class, as well as saved models are located in `training`. 
+- Dependencies to be installed via pip are saved in `requirements.txt`
+
 # Setup
 
 To install all dependencies we suggest using a virtual environment (venv), and running:
@@ -132,27 +154,4 @@ python main.py model=torch_resnet torch_resnet.model_type=resent50 mode=process_
 
 
 
-# DATASET
-we using serveral dataset for this project, the dataset is:
-- CK+ (Cohn-Kanade Extended) dataset
-    - Input size: 48x48
-    - Number of classes: 6
-    - Number of samples: 327   
-- FER2013 dataset
-    - Input size: 48x48
-    - Number of classes: 7
-    - Number of samples: 35887
 
-# MODELS
-We have implemented several models for this project, the models are:
-- CNN
-- ViT
-- Hybrid (CNN + ViT)
-- FCN (Feature Clustering Network)
-
-# Repository Overview 
-
-- Datasets, as well as corresponding util files are saved in `data`.
-- Models, with CNN, ViT and hybrid architectures, as well as underlying Modules such as Transformer Blocks, are located in `models`.
-- The base training class, as well as saved models are located in `training`. 
-- Dependencies to be installed via pip are saved in `requirements.txt`

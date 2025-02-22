@@ -2,7 +2,7 @@
 
 Group Project of the Winter 2024 Computer Vision and Deep Learning Practical at Ommer Lab. Group Members: 
 
-Zharfan Nugroho, Sairam Yadla, Wu Yuanluo and Nikolai Röhrich
+Sairam Yadla, Wu Yuanluo, Zharfan Nugroho, and Nikolai Röhrich
 
 # Setup
 
@@ -23,24 +23,29 @@ python main.py model=cnn epochs=10
 python main.py model=cnn cuda=True device=cuda:0
 ```
 
-# RUNNING THE COMPLETE PROCESS
+# RUNNING THE COMPLETE PROCESS (FROM TRAINING TO DEMO)
 
 Please follow these steps to complete the process:
 
 Info:
-For model 'lenet', 'vit'
-For mode 'train' 'process_csv'. By Default it is set to train.
-For dataset_mode 'ck-plus' 'affectnet' 'FER2013'
-No spaces within parameters for example model = vit doesn't work, it must be model=vit.
+**Models (model)**: lenet, vgg, vit, resnet, torch_resnet, hybrid
+**Datasets (dataset_mode)**: all, ck-plus, affectnet, FER2013
+**Modes (mode)**: train, realtime_detection, realtime_attention_map, process_video, process_csv
 
-Step 1: (Dataset and Training)
+
+More individual parameters can be found in **config.yaml** file.
+No spaces within hydra parameters for example **model = vit** doesn't work, it must be **model=vit**.
+
+**Step 1: (Dataset and Training)**
 Train the model using the following hydra command and parametrs. (example)
+Choose the preferred dataset and model to train. We can also set parameters like epochs, cuda, and individual parameters for each model like depth, number of workers etc.
 
+Example for lenet:
 ```
 python main.py model=lenet dataset_mode=ck_plus epochs=10
 ```
 
-For Torch Resnet:
+Example for Torch Resnet:
 
 ```
 python main.py model=torch_resnet dataset_mode=ck_plus epochs=10
@@ -51,36 +56,79 @@ For changing the type of torch resnet for example resnet50. Refer to configs for
 python main.py model=torch_resnet torch_resnet.model_type=resent50 epochs 10
 ```
 
-
-
-Step2: Test Images Predictions.
-
-Please make sure that the model is trained and your validation test images are uploaded/daved in folder "RealTimeDemoandImageCSV\TestImagesFolder" for evaluation. The test image path and CSV File saving is automatically set in code. So once the below is executed you will find the emotion_prediciton.csv in your directory
-
-After this, run the following hydra command (example)
+Once the model is trained the model.pth and logs will be saved in the training folder. We can then run the trained model for realtime detection etc.
+We also have the tensorboard integration, which we can use to analyse the training and testing accuracy. Run the following command in terminal. It will then give link to view the graphs and performace.
 
 ```
-python main.py model=vit mode=process_csv 
+tensorboard --logdir PATH_TO_LOG_FILE
 ```
-For Torch Resnet, Example Resnet50:
+
+
+**Step 2: Using the trained model for emotion detection in realtime, video and image processing.**
+
+**Step 2.1**: Realtime detection (Emotion Detection and GradCAM View)
+
+INFO: As we decided to go with the hybrid architecture for our project, the GradCAM was implemented only for the hybrid model so it works only when model=hybrid.
+
+We can now use the trained model for realtime evaluation. To do so please use the below hydra command:
+
+```
+python main.py model=hybrid mode=realtime_detection
+```
+This command will load the recently trained model in the training folder. For example, here we chose hybrid model so it will load the recently trained model in hybrid section from training folder. We can specify our desired model then it will take from that corresponding section from trainig folder.
+
+We can also pass our custom model path stored in some other directory to use the model by using the following command. 
+
+```
+python main.py custom_model_path=MODEL_PATH_FILE.pth mode=realtime_detection
+```
+
+
+For GradCAM view we choose mode as realtime_attention_map:
+
+```
+python main.py model=hybrid mode=realtime_attention_map
+
+```
+So in this way we can load the trained model and choose the desired mode. When we run the demo these following features exists:
+
+T - Switch between Normal Emotion Detection and GradCAM view
+C - Switch camera (if any multiple cameras exist)
+Y- Switch the displayed probabilites (either top left of screen or under the detected face)
+
+And in the RealTimeEmotionDetector.py code we can also set the 'threshold' for neutral emotion and also 'processing_interval=n' which basically processes the every n-th frame.
+
+**Step 2.2: Video Output with Emotions and GradCAM**
+
+Like realtime detection, we can also give a certain video with facial expressions to get the output video file with emotions and GradCAM overlayed.
+To do so make sure you have the original/input video path and then run the following command:
+
+```
+python main.py model=hybrid mode=process_video input_video_path=ORIGINAL_VIDEO_PATH.mp4 
+```
+
+This will process the given video and gives the desired output with emotions and GradCAM overlays for detected faces.
+
+
+**Step 2.3: Image Classification.**
+
+We can also give set of images to classify the emotions and outout the CSV file with detected values for different emotions.
+
+```
+python main.py model=hybrid mode=process_csv
+```
+This will take all the images in the RealTimeDemoandImageCSV\TestImagesFolder and classify them. But we can also give our own Image Folder path with the following command:
+
+```
+python main.py model=hybrid mode=process_csv image_folder=IMAGE_FOLDER_PATH
+```
+
+Example for Torch Resnet:
+
 ```
 python main.py model=torch_resnet torch_resnet.model_type=resent50 mode=process_csv
 ```
 
-If you want to change the validation image folder or output folder. Feel free to do so with below command format
-```
-python main.py mode=process_csv model=vit image_folder=./RealTimeDemoandImageCSV/TestImagesFolder output_csv=predictions.csv
-
-```
-Step 3: (Realtime Face Demo and Feature Maps)
-
-Same as Image Processing, but mode=realtime_detection (for normal emotion detection), mode=realtime_gradient (for activation maps)
-
-```
-python main.py model=vit mode=realtime_detection
-
-python main.py model=vit mode=realtime_gradient
-```
 
 
 # DATASET

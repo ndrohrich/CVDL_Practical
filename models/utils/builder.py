@@ -1,5 +1,6 @@
 from models import ViT
 from models import FCN
+from models import ACN
 from models import CNN_LeNet
 import torch
 import os

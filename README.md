@@ -1,7 +1,8 @@
 # CVDL_Practical
 
-Group Project of the Winter 2024 Computer Vision and Deep Learning Practical at Ommer Lab. Group Members: 
+Group Project of the Winter 2024 Computer Vision and Deep Learning Practical at Ommer Lab. 
 
+**SWAN Group Members:**
 Sairam Yadla, Wu Yuanluo, Zharfan Nugroho, and Nikolai Röhrich
 
 # Setup
@@ -28,9 +29,9 @@ python main.py model=cnn cuda=True device=cuda:0
 Please follow these steps to complete the process:
 
 Info:
-**Models (model)**: lenet, vgg, vit, resnet, torch_resnet, hybrid
-**Datasets (dataset_mode)**: all, ck-plus, affectnet, FER2013
-**Modes (mode)**: train, realtime_detection, realtime_attention_map, process_video, process_csv
+-**Models (model)**: lenet, vgg, vit, resnet, torch_resnet, hybrid
+-**Datasets (dataset_mode)**: all, ck-plus, affectnet, FER2013
+-**Modes (mode)**: train, realtime_detection, realtime_attention_map, process_video, process_csv
 
 
 More individual parameters can be found in **config.yaml** file.
@@ -92,9 +93,9 @@ python main.py model=hybrid mode=realtime_attention_map
 ```
 So in this way we can load the trained model and choose the desired mode. When we run the demo these following features exists:
 
-T - Switch between Normal Emotion Detection and GradCAM view
-C - Switch camera (if any multiple cameras exist)
-Y- Switch the displayed probabilites (either top left of screen or under the detected face)
+-T - Switch between Normal Emotion Detection and GradCAM view
+-C - Switch camera (if any multiple cameras exist)
+-Y- Switch the displayed probabilites (either top left of screen or under the detected face)
 
 And in the RealTimeEmotionDetector.py code we can also set the 'threshold' for neutral emotion and also 'processing_interval=n' which basically processes the every n-th frame.
 

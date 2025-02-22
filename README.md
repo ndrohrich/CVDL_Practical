@@ -97,7 +97,7 @@ So in this way we can load the trained model and choose the desired mode. When w
 - C - Switch camera (if any multiple cameras exist)
 - Y- Switch the displayed probabilites (either top left of screen or under the detected face)
 
-And in the RealTimeEmotionDetector.py code we can also set the 'threshold' for neutral emotion and also 'processing_interval=n' which basically processes the every n-th frame.
+And in the **RealTimeEmotionDetector.py** code we can also set the **'threshold'** for neutral emotion and also **'processing_interval=n'** which basically processes the every n-th frame.
 
 **Step 2.2: Video Output with Emotions and GradCAM**
 

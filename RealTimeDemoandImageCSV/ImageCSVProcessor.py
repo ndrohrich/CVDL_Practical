@@ -6,15 +6,13 @@ from PIL import UnidentifiedImageError
 
 
 
-#emotion_labels_def = ['happy', 'surprise', 'sadness', 'anger', 'disgust', 'fear']
-
 class ImageCSVProcessor:
     def __init__(self, model, transform, emotion_labels): #emotion labels are passed in main.py
         self.model = model
         self.transform = transform
         self.emotion_labels = emotion_labels
         self.neutral_label = "neutral"
-        self.threshold= 0.75 #this seems to be working for images
+        self.threshold= 0.6
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = self.model.to(self.device)
         self.model.eval()

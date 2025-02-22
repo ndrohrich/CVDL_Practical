@@ -137,6 +137,8 @@ This will process the given video and gives the desired output with emotions and
 
 We can also give set of images to classify the emotions and outout the CSV file with detected values for different emotions.
 
+In **ImageCSVProcessor.py** the threshold for neutral is set to 0.6 as it seems to be functioning well.
+
 ```
 python main.py model=hybrid mode=process_csv
 ```

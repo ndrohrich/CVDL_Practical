@@ -2,10 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-#accuracy is coming good for this on ckplus (83% for 60 epochs)..so lets see
 
-#to be tested with affectnet
-#still figuring out feature maps 
 
 #https://www.kaggle.com/code/blurredmachine/lenet-architecture-a-complete-guide
 

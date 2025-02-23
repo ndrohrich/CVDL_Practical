@@ -155,5 +155,10 @@ python main.py model=torch_resnet torch_resnet.model_type=resent50 mode=process_
 ```
 
 
+**Parameters used in the Final Training of our Model:**
+```
+python main.py model=hybrid hybrid_encoder=standard epochs=100 num_workers=16 batch_size=128 embed_dim=128
+```
+
 
 
